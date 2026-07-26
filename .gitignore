@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# スクレイパーのHTMLキャッシュ（再取得可能なため公開しない）
+03_web_scraper/.cache/
+
+.DS_Store
+Thumbs.db
+~$*.xlsx
