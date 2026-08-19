@@ -9,3 +9,6 @@ venv/
 .DS_Store
 Thumbs.db
 ~$*.xlsx
+
+# 実業務データ（実在の生徒・講師情報を含むため公開しない）
+work/
