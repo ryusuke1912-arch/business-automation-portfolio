@@ -1,0 +1,901 @@
+<title>ヒキツギ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho:wght@600&display=swap">
+<style>
+  :root{
+    --bg:#F6F4EF; --surface:#FFFFFF; --ink:#24272E; --sub:#726D60;
+    --line:#E4E0D5; --accent:#C3502F; --accent-soft:#F3E0D8; --on-accent:#FFFFFF;
+    --pine:#2E6B5E; --pine-soft:#DDEAE5; --amber:#8A6A1F; --amber-soft:#F1E8CF;
+    --shadow:0 1px 3px rgba(36,39,46,.08);
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#15181E; --surface:#1F232B; --ink:#EAE7DF; --sub:#9B968A;
+      --line:#343946; --accent:#E06A47; --accent-soft:#3A2A24; --on-accent:#1A130F;
+      --pine:#57A794; --pine-soft:#22332F; --amber:#CBA24A; --amber-soft:#332C1C;
+      --shadow:0 1px 3px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#15181E; --surface:#1F232B; --ink:#EAE7DF; --sub:#9B968A;
+    --line:#343946; --accent:#E06A47; --accent-soft:#3A2A24; --on-accent:#1A130F;
+    --pine:#57A794; --pine-soft:#22332F; --amber:#CBA24A; --amber-soft:#332C1C;
+    --shadow:0 1px 3px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Noto Sans JP",-apple-system,"Hiragino Kaku Gothic ProN","Hiragino Sans",sans-serif;
+    font-size:15px; line-height:1.7; margin:0;
+    -webkit-text-size-adjust:100%;
+  }
+  header{
+    position:sticky; top:0; z-index:20;
+    background:var(--bg); border-bottom:1px solid var(--line);
+    padding:calc(10px + env(safe-area-inset-top)) 16px 10px;
+    display:flex; align-items:baseline; gap:10px;
+  }
+  .brand{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif; font-weight:600; font-size:20px; letter-spacing:.12em}
+  .brand-sub{font-size:11px; color:var(--sub); letter-spacing:.06em}
+  main{padding:16px 16px calc(84px + env(safe-area-inset-bottom)); max-width:640px; margin:0 auto}
+  .view{display:none}
+  .view.active{display:block}
+  h2{font-size:13px; font-weight:700; color:var(--sub); letter-spacing:.1em; margin:22px 0 8px}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px; box-shadow:var(--shadow)}
+
+  /* ---- record view ---- */
+  .rec-stage{display:flex; flex-direction:column; align-items:center; gap:14px; padding:18px 0 6px}
+  .timer{font-size:44px; font-weight:500; font-variant-numeric:tabular-nums; letter-spacing:.02em; line-height:1}
+  .timer.idle{color:var(--sub)}
+  #recBtn{
+    width:104px; height:104px; border-radius:50%; border:none; cursor:pointer;
+    background:var(--accent); color:var(--on-accent);
+    font-family:inherit; font-size:15px; font-weight:700; letter-spacing:.1em;
+    box-shadow:0 4px 14px rgba(195,80,47,.35);
+    transition:transform .15s;
+  }
+  #recBtn:active{transform:scale(.95)}
+  #recBtn.recording{background:var(--surface); color:var(--accent); border:3px solid var(--accent); animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(195,80,47,.35)}50%{box-shadow:0 0 0 14px rgba(195,80,47,0)}}
+  @media (prefers-reduced-motion: reduce){ #recBtn.recording{animation:none} }
+  #meter{width:100%; max-width:340px; height:36px; display:block}
+  .boost-row{display:flex; align-items:center; gap:10px; width:100%; max-width:340px}
+  .boost-row label{font-size:12px; color:var(--sub); white-space:nowrap}
+  .boost-row input{flex:1; accent-color:var(--accent)}
+  .boost-val{font-size:12px; font-variant-numeric:tabular-nums; color:var(--sub); width:38px; text-align:right}
+  .hint{font-size:12px; color:var(--sub); margin:6px 0 0}
+  .live{min-height:90px; max-height:38vh; overflow-y:auto; white-space:pre-wrap; font-size:14px}
+  .live .interim{color:var(--sub)}
+  .live:empty::before{content:"ここにライブ文字起こしが表示されます"; color:var(--sub); font-size:12px}
+
+  /* ---- forms ---- */
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .field{display:flex; flex-direction:column; gap:4px}
+  .field span{font-size:11px; color:var(--sub); letter-spacing:.05em}
+  input[type=text],input[type=date],textarea,select{
+    font-family:inherit; font-size:15px; color:var(--ink);
+    background:var(--surface); border:1px solid var(--line); border-radius:8px;
+    padding:9px 10px; width:100%;
+  }
+  textarea{min-height:220px; line-height:1.7; resize:vertical}
+  input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+  .count{font-size:11px; color:var(--sub); text-align:right; margin-top:4px}
+
+  /* ---- buttons ---- */
+  .btn{
+    font-family:inherit; font-size:14px; font-weight:700; letter-spacing:.04em;
+    border:none; border-radius:10px; padding:12px 16px; cursor:pointer;
+    background:var(--surface); color:var(--ink); border:1px solid var(--line);
+  }
+  .btn:active{transform:scale(.98)}
+  .btn.primary{background:var(--accent); color:var(--on-accent); border-color:transparent}
+  .btn.pine{background:var(--pine); color:#fff; border-color:transparent}
+  .btn.block{display:block; width:100%}
+  .btn:disabled{opacity:.45; cursor:default}
+  .btn-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+  .btn-row .btn{flex:1; min-width:130px}
+
+  /* ---- notices ---- */
+  .notice{border-radius:10px; padding:10px 12px; font-size:13px; margin:10px 0}
+  .notice.warn{background:var(--amber-soft); color:var(--amber)}
+  .notice.ok{background:var(--pine-soft); color:var(--pine)}
+  .notice.err{background:var(--accent-soft); color:var(--accent)}
+  .notice[hidden]{display:none!important}
+
+  /* ---- handover output ---- */
+  .doc{white-space:pre-wrap; font-size:14px; min-height:60px}
+  .doc h1{font-size:18px; margin:.4em 0 .2em; white-space:normal}
+  .doc h2,.doc h3{font-size:15px; color:var(--ink); letter-spacing:.02em; margin:1em 0 .2em; border-left:3px solid var(--accent); padding-left:8px; white-space:normal}
+  .doc ul{margin:.2em 0; padding-left:1.3em; white-space:normal}
+  .doc li{margin:.15em 0}
+  .doc p{margin:.3em 0; white-space:pre-wrap}
+  .doc .tblwrap{overflow-x:auto; margin:.4em 0}
+  .doc table{border-collapse:collapse; font-size:12px; white-space:normal}
+  .doc th,.doc td{border:1px solid var(--line); padding:4px 8px; text-align:left; vertical-align:top}
+  .doc th{background:var(--bg); font-weight:700}
+  .thinking{color:var(--sub); font-size:13px}
+  .thinking::after{content:"…"; animation:dots 1.2s steps(3) infinite}
+  @keyframes dots{0%{content:""}33%{content:"."}66%{content:".."}100%{content:"..."}}
+
+  /* ---- history ---- */
+  .hist-item{display:block; width:100%; text-align:left; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px; cursor:pointer; font-family:inherit; color:var(--ink)}
+  .hist-item .h-top{display:flex; justify-content:space-between; gap:8px; font-size:13px; font-weight:700}
+  .hist-item .h-date{color:var(--sub); font-weight:400; font-variant-numeric:tabular-nums}
+  .hist-item .h-prev{font-size:12px; color:var(--sub); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+
+  /* ---- tab bar ---- */
+  nav{
+    position:fixed; bottom:0; left:0; right:0; z-index:20;
+    background:var(--surface); border-top:1px solid var(--line);
+    display:flex; padding-bottom:env(safe-area-inset-bottom);
+  }
+  nav button{
+    flex:1; background:none; border:none; font-family:inherit; cursor:pointer;
+    padding:10px 0 8px; font-size:11px; color:var(--sub); letter-spacing:.05em;
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+  }
+  nav button .ico{font-size:18px; line-height:1}
+  nav button.active{color:var(--accent); font-weight:700}
+  .reddot{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--accent); margin-left:4px; vertical-align:1px; animation:pulse 1.6s infinite}
+</style>
+
+<header>
+  <div class="brand">ヒキツギ</div>
+  <div class="brand-sub">保護者面談 録音 → 講師引き継ぎ書</div>
+</header>
+
+<main>
+  <!-- ============ 録音 ============ -->
+  <section class="view active" id="view-rec">
+    <div class="rec-stage">
+      <div class="timer idle" id="timer">00:00</div>
+      <button id="recBtn">録音開始</button>
+      <canvas id="meter" width="680" height="72"></canvas>
+      <div class="boost-row">
+        <label for="boost">集音ブースト</label>
+        <input type="range" id="boost" min="1" max="4" step="0.1" value="2.2">
+        <span class="boost-val" id="boostVal">2.2×</span>
+      </div>
+      <p class="hint">2m 程度離れた声も拾えるよう、低音ノイズ除去＋自動レベル調整＋増幅をかけて録音します。iPhone は<b>下端のマイクを相手側に向けて</b>置くのがコツです。</p>
+    </div>
+    <div class="notice err" id="micNotice" hidden></div>
+    <div class="notice warn" id="srNotice" hidden></div>
+    <h2>ライブ文字起こし</h2>
+    <div class="card live" id="liveBox"></div>
+    <div class="btn-row">
+      <button class="btn" id="saveAudioBtn" disabled>録音ファイルを保存</button>
+      <button class="btn primary" id="toEditBtn" disabled>内容の確認へ →</button>
+    </div>
+  </section>
+
+  <!-- ============ 内容 ============ -->
+  <section class="view" id="view-edit">
+    <h2>面談情報</h2>
+    <div class="card">
+      <div class="grid2">
+        <label class="field"><span>生徒名</span><input type="text" id="fStudent" placeholder="山田 太郎" autocomplete="off"></label>
+        <label class="field"><span>学年</span><input type="text" id="fGrade" placeholder="中2" autocomplete="off"></label>
+        <label class="field"><span>受講科目</span><input type="text" id="fSubject" placeholder="英語・数学" autocomplete="off"></label>
+        <label class="field"><span>面談日</span><input type="date" id="fDate"></label>
+        <label class="field" style="grid-column:1/-1"><span>面談担当（教室長など）</span><input type="text" id="fInterviewer" placeholder="教室長" autocomplete="off"></label>
+      </div>
+    </div>
+    <h2>文字起こし（編集できます）</h2>
+    <textarea id="transcript" placeholder="録音画面の文字起こしがここに入ります。うまく拾えなかった場合は、ボイスメモ等の文字起こしをここに貼り付けても OK です。"></textarea>
+    <div class="count"><span id="charCount">0</span> 文字</div>
+    <button class="btn primary block" id="toGenBtn">引き継ぎ書の作成へ →</button>
+  </section>
+
+  <!-- ============ 引き継ぎ ============ -->
+  <section class="view" id="view-gen">
+    <h2>講師への引き継ぎ書</h2>
+    <div class="notice warn" id="genNotice" hidden></div>
+    <div class="btn-row" style="margin-top:0">
+      <button class="btn primary" id="genBtn">AI で引き継ぎ書を作成</button>
+      <button class="btn" id="stopGenBtn" hidden>停止</button>
+    </div>
+
+    <div id="fallbackBox" hidden>
+      <div class="notice warn">この画面では AI 生成が使えないため、手動モードに切り替えました。①でプロンプトをコピーして Claude アプリに貼り付け、返ってきた文書を②に貼り付けてください。</div>
+      <button class="btn block" id="copyPromptBtn">① 指示文＋文字起こしをコピー</button>
+      <label class="field" style="margin-top:10px"><span>② Claude の回答を貼り付け</span>
+        <textarea id="pasteResult" style="min-height:140px" placeholder="ここに貼り付けて「反映」を押してください"></textarea>
+      </label>
+      <button class="btn block" id="applyPasteBtn" style="margin-top:8px">反映</button>
+    </div>
+
+    <div class="card doc" id="docBox" style="margin-top:12px"></div>
+    <div class="btn-row">
+      <button class="btn pine" id="docxBtn" disabled>Word (.docx) で保存</button>
+      <button class="btn" id="copyDocBtn" disabled>本文をコピー</button>
+      <button class="btn" id="saveDbBtn" disabled>記録に保存</button>
+    </div>
+    <div class="notice ok" id="doneNotice" hidden></div>
+  </section>
+
+  <!-- ============ 記録 ============ -->
+  <section class="view" id="view-hist">
+    <h2>保存した面談記録</h2>
+    <div class="notice warn" id="histNotice" hidden></div>
+    <div id="histList"></div>
+  </section>
+</main>
+
+<nav>
+  <button data-view="rec" class="active"><span class="ico">●</span>録音<span id="recDot" hidden class="reddot"></span></button>
+  <button data-view="edit"><span class="ico">✎</span>内容</button>
+  <button data-view="gen"><span class="ico">➤</span>引き継ぎ</button>
+  <button data-view="hist"><span class="ico">▤</span>記録</button>
+</nav>
+
+<script>
+"use strict";
+/* =============== 状態と保存 =============== */
+const $ = id => document.getElementById(id);
+const state = {
+  transcript: "", handover: "", audioBlob: null, audioExt: "mp4",
+  recording: false,
+};
+const DRAFT_KEY = "hikitsugi.draft.v1";
+function saveDraft(){
+  try{
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({
+      transcript: $("transcript").value, handover: state.handover,
+      student: $("fStudent").value, grade: $("fGrade").value, subject: $("fSubject").value,
+      date: $("fDate").value, interviewer: $("fInterviewer").value,
+    }));
+  }catch(e){}
+}
+function loadDraft(){
+  try{
+    const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null");
+    if(!d) return;
+    $("transcript").value = d.transcript || "";
+    state.handover = d.handover || "";
+    $("fStudent").value = d.student || ""; $("fGrade").value = d.grade || "";
+    $("fSubject").value = d.subject || ""; $("fInterviewer").value = d.interviewer || "";
+    if(d.date) $("fDate").value = d.date;
+  }catch(e){}
+}
+
+/* =============== タブ切替 =============== */
+document.querySelectorAll("nav button").forEach(b=>{
+  b.addEventListener("click", ()=>showView(b.dataset.view));
+});
+function showView(name){
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active", v.id==="view-"+name));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active", b.dataset.view===name));
+  if(name==="hist") renderHistory();
+  if(name==="gen") renderDocBox();
+}
+
+/* =============== capabilities =============== */
+let cap = { sample:null, downloads:null, db:null, ready:false };
+(async()=>{
+  try{
+    if(window.claude && typeof claude.use === "function"){
+      const [s,dl,db] = await Promise.all([
+        claude.use("sample"), claude.use("downloads"), claude.use("db"),
+      ]);
+      cap.sample=s; cap.downloads=dl; cap.db=db;
+    }
+  }catch(e){}
+  cap.ready = true;
+  if(!cap.sample){ $("fallbackBox").hidden = false; $("genBtn").hidden = true; }
+})();
+
+/* =============== 録音（集音強化チェーン） =============== */
+let stream=null, actx=null, gainNode=null, analyser=null, recorder=null, chunks=[];
+let timerIv=null, startAt=0, wakeLock=null, rafId=0;
+
+const boostEl=$("boost");
+boostEl.addEventListener("input", ()=>{
+  $("boostVal").textContent = Number(boostEl.value).toFixed(1)+"×";
+  if(gainNode) gainNode.gain.value = Number(boostEl.value);
+});
+
+$("recBtn").addEventListener("click", ()=> state.recording ? stopRec() : startRec());
+
+function pickMime(){
+  const cands=["audio/mp4","audio/webm;codecs=opus","audio/webm"];
+  for(const m of cands){ try{ if(MediaRecorder.isTypeSupported(m)) return m; }catch(e){} }
+  return "";
+}
+async function startRec(){
+  $("micNotice").hidden = true;
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    return micFail("この画面ではマイクを利用できません。共有メニュー等から「ブラウザ（Safari）で開く」を試すか、別アプリで録音・文字起こしした内容を「内容」タブに貼り付けてください。");
+  }
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({ audio: {
+      echoCancellation:false, noiseSuppression:false, autoGainControl:true,
+    }});
+  }catch(e){
+    return micFail(e && (e.name==="NotAllowedError"||e.name==="SecurityError")
+      ? "マイクの使用が許可されませんでした。iPhone の 設定 → アプリ → Safari（またはこのアプリ）→ マイク を許可してから再試行してください。"
+      : "マイクを起動できませんでした（"+(e&&e.name||"エラー")+"）。ページを再読み込みして再試行してください。");
+  }
+  const AC = window.AudioContext || window.webkitAudioContext;
+  actx = new AC();
+  try{ await actx.resume(); }catch(e){}
+  const src = actx.createMediaStreamSource(stream);
+  const hp = actx.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=85;       // 空調・振動ノイズ除去
+  const comp = actx.createDynamicsCompressor();                                          // 遠い声を持ち上げる
+  comp.threshold.value=-45; comp.knee.value=30; comp.ratio.value=6;
+  comp.attack.value=0.003; comp.release.value=0.25;
+  gainNode = actx.createGain(); gainNode.gain.value = Number(boostEl.value);
+  const limiter = actx.createDynamicsCompressor();                                       // 近い声の割れ防止
+  limiter.threshold.value=-6; limiter.knee.value=3; limiter.ratio.value=20;
+  limiter.attack.value=0.001; limiter.release.value=0.1;
+  analyser = actx.createAnalyser(); analyser.fftSize=1024;
+  const dest = actx.createMediaStreamDestination();
+  src.connect(hp); hp.connect(comp); comp.connect(gainNode); gainNode.connect(limiter);
+  limiter.connect(analyser); limiter.connect(dest);
+
+  chunks=[]; const mime=pickMime();
+  state.audioExt = mime.indexOf("mp4")>=0 ? "mp4" : "webm";
+  try{ recorder = mime ? new MediaRecorder(dest.stream,{mimeType:mime}) : new MediaRecorder(dest.stream); }
+  catch(e){ recorder = new MediaRecorder(dest.stream); }
+  recorder.ondataavailable = ev=>{ if(ev.data && ev.data.size) chunks.push(ev.data); };
+  recorder.onstop = ()=>{
+    state.audioBlob = new Blob(chunks, {type: mime || "audio/webm"});
+    $("saveAudioBtn").disabled = !state.audioBlob.size;
+  };
+  recorder.start(1000);
+
+  state.recording = true;
+  $("recBtn").textContent="停止"; $("recBtn").classList.add("recording");
+  $("recDot").hidden=false; $("timer").classList.remove("idle");
+  startAt=Date.now();
+  timerIv=setInterval(()=>{
+    const s=Math.floor((Date.now()-startAt)/1000);
+    $("timer").textContent=String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+  },500);
+  drawMeter();
+  acquireWakeLock();
+  startRecognition();
+}
+function micFail(msg){ const n=$("micNotice"); n.textContent=msg; n.hidden=false; }
+
+function stopRec(){
+  state.recording=false;
+  try{ recorder && recorder.state!=="inactive" && recorder.stop(); }catch(e){}
+  try{ stream && stream.getTracks().forEach(t=>t.stop()); }catch(e){}
+  try{ actx && actx.close(); }catch(e){}
+  actx=null; gainNode=null; analyser=null;
+  cancelAnimationFrame(rafId); clearInterval(timerIv);
+  if(wakeLock){ try{ wakeLock.release(); }catch(e){} wakeLock=null; }
+  stopRecognition();
+  $("recBtn").textContent="録音開始"; $("recBtn").classList.remove("recording");
+  $("recDot").hidden=true;
+  // ライブ結果を本文へ
+  if(finalText.trim()){
+    const t=$("transcript");
+    t.value = (t.value ? t.value.replace(/\s+$/,"")+"\n" : "") + finalText.trim();
+    $("charCount").textContent = t.value.length;
+    saveDraft();
+  }
+  finalText="";
+  $("toEditBtn").disabled=false;
+}
+async function acquireWakeLock(){
+  try{ if("wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen"); }catch(e){}
+}
+document.addEventListener("visibilitychange", ()=>{
+  if(document.visibilityState==="visible" && state.recording) acquireWakeLock();
+});
+
+function drawMeter(){
+  const cv=$("meter"), c=cv.getContext("2d");
+  const buf=new Uint8Array(analyser.fftSize);
+  let peak=0;
+  const css=getComputedStyle(document.documentElement);
+  const loop=()=>{
+    if(!analyser) return;
+    analyser.getByteTimeDomainData(buf);
+    let sum=0, mx=0;
+    for(let i=0;i<buf.length;i++){ const v=(buf[i]-128)/128; sum+=v*v; mx=Math.max(mx,Math.abs(v)); }
+    const rms=Math.sqrt(sum/buf.length);
+    peak=Math.max(peak*0.96, mx);
+    c.clearRect(0,0,cv.width,cv.height);
+    const w=Math.min(1, rms*3.2)*cv.width;
+    c.fillStyle=css.getPropertyValue("--line"); c.fillRect(0,28,cv.width,16);
+    c.fillStyle=css.getPropertyValue("--accent"); c.fillRect(0,28,w,16);
+    c.fillStyle=css.getPropertyValue("--sub");
+    c.fillRect(Math.min(cv.width-3, peak*cv.width),24,3,24);
+    rafId=requestAnimationFrame(loop);
+  };
+  loop();
+}
+
+/* =============== ライブ文字起こし =============== */
+let recog=null, finalText="", recogAlive=false;
+function startRecognition(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  $("srNotice").hidden=true;
+  if(!SR){
+    const n=$("srNotice");
+    n.textContent="この環境ではライブ文字起こしを利用できません。録音は継続します。面談後、iPhone ボイスメモの文字起こし等を「内容」タブに貼り付けてください。";
+    n.hidden=false; return;
+  }
+  finalText=""; recogAlive=true;
+  recog = new SR();
+  recog.lang="ja-JP"; recog.continuous=true; recog.interimResults=true;
+  recog.onresult = ev=>{
+    let interim="";
+    for(let i=ev.resultIndex;i<ev.results.length;i++){
+      const r=ev.results[i];
+      if(r.isFinal) finalText += r[0].transcript + "\n";
+      else interim += r[0].transcript;
+    }
+    const box=$("liveBox");
+    box.textContent="";
+    box.append(finalText);
+    if(interim){ const s=document.createElement("span"); s.className="interim"; s.textContent=interim; box.append(s); }
+    box.scrollTop=box.scrollHeight;
+  };
+  recog.onend = ()=>{ if(recogAlive) setTimeout(()=>{ try{ recog.start(); }catch(e){} },250); };
+  recog.onerror = ev=>{
+    if(ev.error==="no-speech" || ev.error==="aborted") return;
+    const n=$("srNotice");
+    n.textContent="文字起こしが中断しました（"+ev.error+"）。録音は継続しています。";
+    n.hidden=false;
+  };
+  try{ recog.start(); }catch(e){}
+}
+function stopRecognition(){ recogAlive=false; try{ recog && recog.stop(); }catch(e){} recog=null; }
+
+/* =============== 内容タブ =============== */
+$("transcript").addEventListener("input", ()=>{ $("charCount").textContent=$("transcript").value.length; saveDraft(); });
+["fStudent","fGrade","fSubject","fDate","fInterviewer"].forEach(id=>$(id).addEventListener("input",saveDraft));
+$("toEditBtn").addEventListener("click", ()=>showView("edit"));
+$("toGenBtn").addEventListener("click", ()=>showView("gen"));
+
+/* =============== 録音ファイル保存 =============== */
+$("saveAudioBtn").addEventListener("click", async ()=>{
+  if(!state.audioBlob) return;
+  const name = "面談録音_"+today()+"."+state.audioExt;
+  if(cap.downloads){
+    try{ await cap.downloads.save({filename:name, data:state.audioBlob}); return; }
+    catch(e){ if(e && e.code==="declined") return; }
+  }
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(state.audioBlob); a.download=name;
+  document.body.append(a); a.click(); a.remove();
+});
+function today(){ return $("fDate").value || new Date().toISOString().slice(0,10); }
+
+/* =============== 引き継ぎ書生成プロンプト =============== */
+const PROMPT_SYS = `あなたは個別指導学習塾の教室長を補佐するアシスタントです。
+保護者面談の文字起こしを読み、担当講師にそのまま渡せる「引き継ぎ書」を作成します。
+
+【入力の前提（必ず考慮すること）】
+1. 文字起こしは口語であり、言い淀み・繰り返し・言い直し・脱線が多く含まれます。
+2. 話者分離がありません。誰の発言かはテキストの文脈（敬語・立場・話題）から推定する必要があります。
+3. 音声認識の誤変換があります。特に以下は誤りやすいので鵜呑みにしないこと。
+   - 人名・学校名・塾内の教材名・コース名
+   - 数値（点数・偏差値・順位・時刻・金額・学年）
+   - 科目名や単元名（例：「二次関数」→「二次感数」などの誤変換）
+4. 保護者が一度言って後から訂正・撤回している場合があります。会話の後半の発言を優先します。
+
+【事実と推測の区別（最重要ルール）】
+出力に書く情報は、必ず次の3段階のいずれかに分類し、書き分けてください。
+- 【事実】文字起こしに明示的に述べられている内容。
+  → 通常の文体で記載する。重要な要望は保護者の言い回しを短く引用してよい。
+- 【推測】文字起こしから合理的に導けるが、明言はされていない内容。
+  → 文末に「（推測）」を付け、「〜と思われます」「〜の可能性があります」と書く。
+  → 推測の根拠を必ず1行添える（例：「（推測：『最近やる気が…』という発言より）」）。
+- 【要確認】聞き取り不能、発言が曖昧、または誤変換が疑われる内容。
+  → 「（要確認）」を付け、教室長への確認が必要である旨を明記する。
+  → 特に数値・固有名詞に不自然さがある場合は必ず【要確認】にする。
+
+【厳守事項】
+- 文字起こしに存在しない事実を創作しないでください。該当情報がなければ「記載なし」と書きます。
+- 「記載なし」を推測で埋めないでください。埋める場合は必ず【推測】として明示します。
+- 話者が不明な発言は断定せず、「保護者側の発言と思われます」等と表現します。
+- 数値は文字起こしの通りに書き、出典（模試名・テスト回次など）が不明なら「（出典不明・要確認）」を付けます。
+- 家庭事情・健康・発達特性・経済状況などの機微情報は、「講師が知らないと不適切な対応をしてしまう情報」に限定して第7章に記載します。
+  それ以外の詮索的な内容、噂、雑談として流れただけの家庭の内情は書かないでください。
+- 保護者や生徒を評価・断罪する表現（「意識が低い」「過干渉」など）は使わず、観察された事実の記述に留めます。
+
+【文体・体裁】
+- 敬体（です・ます調）で、講師に対する業務文書として丁寧に書きます。
+- 口語のフィラー（「えーと」「あの」「まあ」）は除去し、意味を保ったまま整った書き言葉に直します。
+- 出力はMarkdown。見出し・表・箇条書きを使い、前置きや後書き（「以下が引き継ぎ書です」等）は書かず、文書本体のみを出力します。
+- 講師が最初の30秒で要点を掴めるよう、冒頭に「3行サマリー」を置きます。
+
+【指導依頼の作り方】
+- 面談内容を、講師が次回授業で実行できる粒度の行動に落とし込みます。
+  悪い例：「モチベーションを上げる」／良い例：「毎回冒頭5分、前回の宿題から2問を口頭で確認する」
+- 優先度はP1〜P3。P1は保護者が最も強く要望した点、または成績・進路への影響が大きい点とします。
+- 依頼ごとに「目的・背景」を1行添え、講師が意図を理解して応用できるようにします。
+
+以下の面談文字起こしから、指定の書式で講師向け引き継ぎ書を作成してください。`;
+
+const PROMPT_FORMAT = `# 出力書式
+
+## 保護者面談 引き継ぎ書
+
+**3行サマリー**
+（1行目＝保護者の主要な要望、2行目＝生徒の現状、3行目＝次回授業からの最優先アクション）
+
+### 1. 生徒基本情報
+氏名 / 学年・在籍校 / 受講科目・コマ数 / 担当講師 / 志望校・目標
+（確定情報を優先。文字起こしからしか取れない項目には「（要確認）」を付す）
+
+### 2. 面談情報
+面談日時 / 面談形式 / 出席者（保護者側・塾側）/ 面談種別 / 生徒本人の同席有無
+
+### 3. 保護者からの要望・懸念
+表形式：| # | 内容 | 優先度(高/中/低) | 対応区分(対応済/要対応/要検討) |
+- 保護者の言い回しを残す。要約しすぎない。
+- 続けて「面談で塾側が回答・約束した内容」を箇条書きで記載する（口頭合意も漏らさない）。
+
+### 4. 生徒の家庭での様子
+家庭学習の量・時間帯 / 学習環境 / 授業への本人の感想 / 生活リズム / 学校での様子 / 併塾・他教材
+- すべて「保護者によると〜」と出典が分かる書き方にする。
+
+### 5. 成績・学習状況の共有事項
+直近の成績（出典つき）/ 強み / つまずき / 塾側の見立て / 保護者の認識とのギャップ / 直近の重要日程
+- 保護者の認識と塾側の見立てにズレがある場合は、両論をそのまま併記する。
+
+### 6. 講師への具体的な指導依頼（優先順位付き）
+表形式：| 優先(P1〜P3) | 指導依頼（具体的な行動） | 目的・背景 | 期限/頻度 |
+- 続けて「教材・進度に関する指示」「声かけ・接し方の方針（避けるべき言い方を含む）」を箇条書きで記載。
+
+### 7. 取り扱い注意事項
+- 該当する機微情報がない場合は「特記事項なし」とだけ書く（無理に埋めない）。
+- 記載する場合は表形式：| 区分 | 内容 | 本人への言及可否 | 共有範囲 |
+- 「NGワード・避けるべき話題」「緊急時の連絡ルール」があれば併記。
+
+### 8. 次回面談・フォローアップ
+次回面談予定 / 次回までに塾が行うこと / 確認する指標 / 中間報告の要否
+続けてタスク表：| # | タスク | 担当 | 期限 |
+
+### 9. 教室長への確認事項（本書作成時点）
+- 【要確認】として拾った項目をすべてここに再掲し、確認すべき理由を1行添える。
+- 誤変換が疑われる固有名詞・数値は、原文の表記を「」で引用して列挙する。
+- 確認事項がない場合は「なし」と書く。
+
+---
+※ 本書は面談録音の文字起こしをもとにAIが下書きしたものです。教室長の確認・修正を経て確定してください。
+※ 個人情報を含みます。教室外への持ち出し・複製・SNS等への投稿を禁じます。`;
+
+function buildInput(){
+  const meta = [
+    "- 生徒名: "+($("fStudent").value||"（未登録）"),
+    "- 学年: "+($("fGrade").value||"（未登録）"),
+    "- 受講科目: "+($("fSubject").value||"（未登録）"),
+    "- 面談日: "+today(),
+    "- 面談担当: "+($("fInterviewer").value||"（未登録）"),
+  ].join("\n");
+  let tx = $("transcript").value.trim();
+  if(tx.length>16000) tx = tx.slice(0,16000)+"\n…（以降省略・長い面談は分割して実行してください）";
+  return PROMPT_SYS
+    + "\n\n# 確定情報（システム登録済み・これは事実として扱う）\n" + meta
+    + "\n\n# 面談文字起こし\n---\n" + tx + "\n---\n\n" + PROMPT_FORMAT;
+}
+
+/* =============== AI 生成 =============== */
+let genCtl=null;
+$("genBtn").addEventListener("click", async ()=>{
+  const tx=$("transcript").value.trim();
+  const n=$("genNotice");
+  if(tx.length<20){ n.textContent="文字起こしが短すぎます。「内容」タブで文字起こしを入力してください。"; n.hidden=false; return; }
+  n.hidden=true;
+  if(!cap.sample){ $("fallbackBox").hidden=false; $("genBtn").hidden=true; return; }
+  genCtl=new AbortController();
+  $("genBtn").disabled=true; $("stopGenBtn").hidden=false;
+  const box=$("docBox");
+  box.innerHTML=""; const th=document.createElement("span"); th.className="thinking"; th.textContent="引き継ぎ書を作成中"; box.append(th);
+  try{
+    const {text, truncated} = await cap.sample(buildInput(), {
+      signal: genCtl.signal, cache:false,
+      onText: ({text})=>{ box.textContent=text; },
+    });
+    state.handover=text; saveDraft(); renderDocBox();
+    if(truncated){ n.textContent="出力が途中で切れました。文字起こしを短くして再実行してください。"; n.hidden=false; }
+  }catch(e){
+    if(e && e.code==="cancelled"){ if(e.text){ state.handover=e.text; saveDraft(); } renderDocBox(); }
+    else if(e && (e.code==="not_granted"||e.code==="sampling_disabled"||e.code==="not_declared"||e.code==="capability_disabled")){
+      cap.sample=null; $("fallbackBox").hidden=false; $("genBtn").hidden=true; renderDocBox();
+    }else{
+      if(e && e.text){ state.handover=e.text; saveDraft(); }
+      renderDocBox();
+      n.textContent = e && e.code==="rate_limited" ? "利用制限に達しました。少し待ってから再実行してください。"
+        : e && e.code==="refused" ? "この内容では作成できませんでした。個人情報などを整理して再実行してください。"
+        : "作成中にエラーが発生しました。もう一度お試しください。";
+      n.hidden=false;
+    }
+  }finally{
+    $("genBtn").disabled=false; $("stopGenBtn").hidden=true; genCtl=null;
+  }
+});
+$("stopGenBtn").addEventListener("click", ()=>{ genCtl && genCtl.abort(); });
+
+/* ---- 手動フォールバック ---- */
+$("copyPromptBtn").addEventListener("click", async function(){
+  await copyText(buildInput(), this);
+});
+$("applyPasteBtn").addEventListener("click", ()=>{
+  const v=$("pasteResult").value.trim();
+  if(!v) return;
+  state.handover=v; saveDraft(); renderDocBox();
+});
+
+/* =============== 表示（簡易 Markdown） =============== */
+function renderDocBox(){
+  const box=$("docBox");
+  const md=state.handover;
+  const has=!!md.trim();
+  $("docxBtn").disabled=!has; $("copyDocBtn").disabled=!has;
+  $("saveDbBtn").disabled=!has || !cap.db;
+  if(!has){ box.innerHTML='<span class="thinking" style="animation:none">ここに引き継ぎ書が表示されます</span>'; return; }
+  box.innerHTML="";
+  const lines=md.split("\n");
+  let i=0, ul=null;
+  while(i<lines.length){
+    const line=lines[i], t=line.trim();
+    if(t.startsWith("|")){                       // 表ブロック
+      ul=null;
+      const rows=[];
+      while(i<lines.length && lines[i].trim().startsWith("|")){
+        const cells=splitRow(lines[i]);
+        if(cells) rows.push(cells);
+        i++;
+      }
+      if(rows.length){
+        const wrap=document.createElement("div"); wrap.className="tblwrap";
+        const tbl=document.createElement("table");
+        rows.forEach((cells,ri)=>{
+          const tr=document.createElement("tr");
+          cells.forEach(c=>{
+            const cell=document.createElement(ri===0?"th":"td");
+            cell.textContent=c.replace(/\*\*/g,"");
+            tr.append(cell);
+          });
+          tbl.append(tr);
+        });
+        wrap.append(tbl); box.append(wrap);
+      }
+      continue;
+    }
+    i++;
+    if(/^[-・*]\s+/.test(t)){
+      if(!ul){ ul=document.createElement("ul"); box.append(ul); }
+      const li=document.createElement("li"); li.textContent=t.replace(/^[-・*]\s+/,"").replace(/\*\*/g,"");
+      ul.append(li); continue;
+    }
+    ul=null;
+    if(!t) continue;
+    if(/^#{1,3}\s/.test(t)){
+      const lvl=t.match(/^#+/)[0].length;
+      const h=document.createElement(lvl===1?"h1":lvl===2?"h2":"h3");
+      h.textContent=t.replace(/^#+\s*/,"").replace(/\*\*/g,"");
+      box.append(h); continue;
+    }
+    if(/^-{3,}$/.test(t)) continue;
+    const p=document.createElement("p"); p.textContent=line.replace(/\*\*/g,""); box.append(p);
+  }
+}
+function splitRow(line){ // "| a | b |" → ["a","b"]、区切り行(---)は null
+  const cells=line.trim().replace(/^\|/,"").replace(/\|$/,"").split("|").map(s=>s.trim());
+  if(cells.every(c=>/^:?-{2,}:?$/.test(c))) return null;
+  return cells;
+}
+
+/* =============== コピー =============== */
+async function copyText(text, btn){
+  let ok=false;
+  try{ await navigator.clipboard.writeText(text); ok=true; }
+  catch(e){
+    const ta=document.createElement("textarea");
+    ta.value=text; document.body.append(ta); ta.select();
+    try{ ok=document.execCommand("copy"); }catch(_){}
+    ta.remove();
+  }
+  if(btn){ const old=btn.textContent; btn.textContent= ok?"コピーしました ✓":"コピーできませんでした"; setTimeout(()=>btn.textContent=old,1600); }
+}
+$("copyDocBtn").addEventListener("click", function(){ copyText(state.handover, this); });
+
+/* =============== Word (.docx) 生成 — 依存ライブラリなし =============== */
+const CRC_TABLE=(()=>{ const t=new Uint32Array(256);
+  for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1); t[n]=c>>>0; } return t; })();
+function crc32(u8){ let c=0xFFFFFFFF; for(let i=0;i<u8.length;i++) c=CRC_TABLE[(c^u8[i])&0xFF]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+function makeZip(files){ // files: [{name, text}] — 無圧縮 STORE 形式
+  const enc=new TextEncoder(); const parts=[]; const central=[]; let offset=0;
+  const u16=v=>new Uint8Array([v&255,(v>>8)&255]);
+  const u32=v=>new Uint8Array([v&255,(v>>8)&255,(v>>16)&255,(v>>24)&255]);
+  for(const f of files){
+    const name=enc.encode(f.name), data=enc.encode(f.text), crc=crc32(data);
+    const head=[u32(0x04034b50),u16(20),u16(0x0800),u16(0),u16(0),u16(0),u32(crc),u32(data.length),u32(data.length),u16(name.length),u16(0)];
+    central.push({name,data,crc,offset});
+    for(const p of head) parts.push(p);
+    parts.push(name,data);
+    offset += 30+name.length+data.length;
+  }
+  const cdStart=offset; let cdSize=0;
+  for(const e of central){
+    const rec=[u32(0x02014b50),u16(20),u16(20),u16(0x0800),u16(0),u16(0),u16(0),u32(e.crc),u32(e.data.length),u32(e.data.length),u16(e.name.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(e.offset)];
+    for(const p of rec) parts.push(p);
+    parts.push(e.name);
+    cdSize += 46+e.name.length;
+  }
+  parts.push(u32(0x06054b50),u16(0),u16(0),u16(central.length),u16(central.length),u32(cdSize),u32(cdStart),u16(0));
+  return new Blob(parts,{type:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+}
+function xmlEsc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function docxFromMarkdown(md){
+  const paras=[];
+  const paraXml=(text,opts)=>{
+    opts=opts||{};
+    let pPr="";
+    if(opts.style) pPr+='<w:pStyle w:val="'+opts.style+'"/>';
+    if(opts.bullet) pPr+='<w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr>';
+    if(pPr) pPr="<w:pPr>"+pPr+"</w:pPr>";
+    // **強調** を分割して bold ラン化
+    let runs="";
+    String(text).split(/(\*\*[^*]+\*\*)/).forEach(seg=>{
+      if(!seg) return;
+      const bold=/^\*\*[^*]+\*\*$/.test(seg) || opts.bold;
+      const body=xmlEsc(bold&&seg.startsWith("**")?seg.slice(2,-2):seg.replace(/\*\*/g,""));
+      runs+='<w:r><w:rPr>'+(bold?'<w:b/>':'')+'</w:rPr><w:t xml:space="preserve">'+body+'</w:t></w:r>';
+    });
+    if(!runs) runs='<w:r><w:t xml:space="preserve"></w:t></w:r>';
+    return "<w:p>"+pPr+runs+"</w:p>";
+  };
+  const P=(text,opts)=>paras.push(paraXml(text,opts));
+  const T=rows=>{ // 表 → w:tbl
+    const cols=Math.max.apply(null,rows.map(r=>r.length));
+    let xml='<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/><w:tblBorders>'+
+      ["top","left","bottom","right","insideH","insideV"].map(s=>'<w:'+s+' w:val="single" w:sz="4" w:color="B8B2A5"/>').join("")+
+      "</w:tblBorders></w:tblPr>";
+    rows.forEach((r,ri)=>{
+      xml+="<w:tr>";
+      for(let c=0;c<cols;c++){
+        xml+='<w:tc><w:tcPr>'+(ri===0?'<w:shd w:val="clear" w:fill="F0EDE4"/>':'')+'</w:tcPr>'+
+          paraXml(r[c]||"",{bold:ri===0})+"</w:tc>";
+      }
+      xml+="</w:tr>";
+    });
+    xml+="</w:tbl>";
+    paras.push(xml, "<w:p/>"); // 表直後に空段落（Word の仕様上必要）
+  };
+  const lines=md.split("\n");
+  let i=0;
+  while(i<lines.length){
+    const line=lines[i], t=line.trim();
+    if(t.startsWith("|")){
+      const rows=[];
+      while(i<lines.length && lines[i].trim().startsWith("|")){
+        const cells=splitRow(lines[i]);
+        if(cells) rows.push(cells);
+        i++;
+      }
+      if(rows.length) T(rows);
+      continue;
+    }
+    i++;
+    if(!t){ P(""); continue; }
+    if(/^-{3,}$/.test(t)) continue;
+    if(/^#{1,2}\s/.test(t)){ P(t.replace(/^#+\s*/,""),{style:"H1"}); continue; }
+    if(/^###\s/.test(t)){ P(t.replace(/^#+\s*/,""),{style:"H2"}); continue; }
+    if(/^[-・*]\s+/.test(t)){ P(t.replace(/^[-・*]\s+/,""),{bullet:true}); continue; }
+    P(line);
+  }
+  const documentXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+  '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'+
+  "<w:body>"+paras.join("")+
+  '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/></w:sectPr>'+
+  "</w:body></w:document>";
+  const stylesXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+  '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'+
+  '<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Yu Gothic" w:eastAsia="Yu Gothic" w:hAnsi="Yu Gothic"/><w:sz w:val="21"/></w:rPr></w:rPrDefault>'+
+  '<w:pPrDefault><w:pPr><w:spacing w:line="320" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>'+
+  '<w:style w:type="paragraph" w:styleId="H1"><w:name w:val="H1"/><w:pPr><w:spacing w:before="200" w:after="100"/></w:pPr><w:rPr><w:b/><w:sz w:val="30"/></w:rPr></w:style>'+
+  '<w:style w:type="paragraph" w:styleId="H2"><w:name w:val="H2"/><w:pPr><w:spacing w:before="200" w:after="60"/><w:pBdr><w:left w:val="single" w:sz="12" w:space="4" w:color="C3502F"/></w:pBdr></w:pPr><w:rPr><w:b/><w:sz w:val="24"/></w:rPr></w:style>'+
+  "</w:styles>";
+  const numberingXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+  '<w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'+
+  '<w:abstractNum w:abstractNumId="0"><w:lvl w:ilvl="0"><w:numFmt w:val="bullet"/><w:lvlText w:val="・"/><w:pPr><w:ind w:left="480" w:hanging="240"/></w:pPr></w:lvl></w:abstractNum>'+
+  '<w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num></w:numbering>';
+  const contentTypes='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+  '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
+  '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'+
+  '<Default Extension="xml" ContentType="application/xml"/>'+
+  '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'+
+  '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>'+
+  '<Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>'+
+  "</Types>";
+  const rels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+  '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+  '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'+
+  "</Relationships>";
+  const docRels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+  '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+  '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'+
+  '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>'+
+  "</Relationships>";
+  return makeZip([
+    {name:"[Content_Types].xml", text:contentTypes},
+    {name:"_rels/.rels", text:rels},
+    {name:"word/_rels/document.xml.rels", text:docRels},
+    {name:"word/document.xml", text:documentXml},
+    {name:"word/styles.xml", text:stylesXml},
+    {name:"word/numbering.xml", text:numberingXml},
+  ]);
+}
+$("docxBtn").addEventListener("click", async function(){
+  if(!state.handover.trim()) return;
+  const blob=docxFromMarkdown(state.handover);
+  const fname="引き継ぎ書_"+($("fStudent").value||"面談")+"_"+today()+".docx";
+  if(cap.downloads){
+    try{ await cap.downloads.save({filename:fname, data:blob});
+      note("doneNotice","Word ファイルを保存しました。"); return;
+    }catch(e){
+      if(e && e.code==="declined") return;
+      if(e && e.code==="rate_limited"){ note("doneNotice","少し待ってからもう一度お試しください。"); return; }
+    }
+  }
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download=fname;
+  document.body.append(a); a.click(); a.remove();
+  note("doneNotice","保存を開始しました。保存できない場合は「本文をコピー」をご利用ください。");
+});
+function note(id,msg){ const n=$(id); n.textContent=msg; n.hidden=false; setTimeout(()=>{n.hidden=true;},4000); }
+
+/* =============== 記録（db） =============== */
+$("saveDbBtn").addEventListener("click", async function(){
+  if(!cap.db || !state.handover.trim()) return;
+  const id = Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+  try{
+    await cap.db.doc("meetings/"+id).set({
+      student:$("fStudent").value, grade:$("fGrade").value, subject:$("fSubject").value,
+      interviewer:$("fInterviewer").value, date:today(),
+      transcript:$("transcript").value, handover:state.handover,
+      createdAt:new Date().toISOString(),
+    });
+    note("doneNotice","面談記録を保存しました（「記録」タブから開けます）。");
+  }catch(e){ note("doneNotice","保存に失敗しました。時間をおいて再試行してください。"); }
+});
+async function renderHistory(){
+  const list=$("histList"), n=$("histNotice");
+  if(!cap.db){
+    if(cap.ready){ n.textContent="記録の保存・一覧は Claude アプリ内でこのページを開いたときに利用できます。"; n.hidden=false; }
+    list.textContent=""; return;
+  }
+  n.hidden=true; list.textContent="読み込み中…";
+  try{
+    const snap=await cap.db.collection("meetings").orderBy("createdAt","desc").limit(50).get();
+    list.textContent="";
+    if(!snap.docs.length){ list.innerHTML='<p class="hint">まだ記録がありません。「引き継ぎ」タブの「記録に保存」で追加できます。</p>'; return; }
+    snap.docs.forEach(d=>{
+      const v=d.data()||{};
+      const b=document.createElement("button"); b.className="hist-item";
+      const top=document.createElement("div"); top.className="h-top";
+      const nm=document.createElement("span"); nm.textContent=(v.student||"（名前なし）")+"（"+(v.grade||"—")+"）";
+      const dt=document.createElement("span"); dt.className="h-date"; dt.textContent=v.date||"";
+      top.append(nm,dt);
+      const prev=document.createElement("div"); prev.className="h-prev";
+      prev.textContent=(v.handover||v.transcript||"").replace(/\s+/g," ").slice(0,60);
+      b.append(top,prev);
+      b.addEventListener("click",()=>{
+        $("fStudent").value=v.student||""; $("fGrade").value=v.grade||"";
+        $("fSubject").value=v.subject||""; $("fInterviewer").value=v.interviewer||"";
+        if(v.date)$("fDate").value=v.date;
+        $("transcript").value=v.transcript||""; $("charCount").textContent=$("transcript").value.length;
+        state.handover=v.handover||""; saveDraft();
+        showView("gen");
+      });
+      list.append(b);
+    });
+  }catch(e){ list.textContent=""; n.textContent="記録を読み込めませんでした。"; n.hidden=false; }
+}
+
+/* =============== 初期化 =============== */
+$("fDate").value = new Date().toISOString().slice(0,10);
+loadDraft();
+$("charCount").textContent=$("transcript").value.length;
+if($("transcript").value) $("toEditBtn").disabled=false;
+renderDocBox();
+</script>
