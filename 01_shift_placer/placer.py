@@ -390,6 +390,37 @@ def write_excel(bd, kpi, report):
     for col, w in zip('ABCDE', (16, 8, 8, 8, 8)):
         ws.column_dimensions[col].width = w
 
+    # ---- 生徒別シート（生徒 → 日付 → 時間 の順に並べ替え） ----
+    ws = wb.create_sheet('生徒別', 1)
+    heads = ['生徒', '学年', '日付', '曜日', '時間', '科目', '講師', '形態']
+    for j, h in enumerate(heads, 1):
+        cc = ws.cell(row=1, column=j, value=h)
+        cc.font, cc.alignment, cc.fill, cc.border = BOLD, CEN, HEAD, BORDER
+    rows = {n: [] for n in bd.students}
+    di = {d['sheet']: i for i, d in enumerate(bd.dates)}
+    for (sh, t, b), lst in bd.seat.items():
+        for e in lst:
+            rows[e['name']].append((di[sh], b, sh, t, e, len(lst)))
+    r = 2
+    for nm, lst in rows.items():
+        if not lst:
+            continue
+        lst.sort(key=lambda x: (x[0], x[1]))
+        top = r
+        for i, b, sh, t, e, n in lst:
+            d = bd.byd[sh]
+            vals = [nm, e['grade'], d['ds'], d['wd'], SLOTNAME[b], e['subj'], t,
+                    '1対2' if n == SEATS else '1対1']
+            for j, v in enumerate(vals, 1):
+                c = ws.cell(row=r, column=j, value=v)
+                c.font, c.alignment, c.border = FONT, CEN, BORDER
+            r += 1
+        ws.merge_cells(start_row=top, start_column=1, end_row=r - 1, end_column=1)
+        ws.merge_cells(start_row=top, start_column=2, end_row=r - 1, end_column=2)
+    ws.freeze_panes = 'A2'
+    for col, w in zip('ABCDEFGH', (14, 6, 8, 6, 8, 8, 12, 8)):
+        ws.column_dimensions[col].width = w
+
     wb.save(OUT)
 
 
