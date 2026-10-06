@@ -1,0 +1,206 @@
+<title>英検対策ご提案資料</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&family=BIZ+UDPGothic:wght@400;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: 印刷前提のA4縦・1カラム。章ごとに罫線で区切り、表とタイムラインで要点を見せる */
+:root{
+  --paper:#fbfcfd; --ink:#18223a; --muted:#56627a; --line:#d5dbe6;
+  --accent:#1f4fa8; --accent-soft:#e6eefb; --mark:#f3c94b; --mark-soft:#fdf4d4;
+  --ok:#2c7a4b;
+  --display:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  --body:"BIZ UDPGothic","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+  --num:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#11161f; --ink:#e7ecf5; --muted:#9aa6bc; --line:#2c3547;
+  --accent:#8fb2f2; --accent-soft:#1b2740; --mark:#e2b83c; --mark-soft:#2e2814; --ok:#6fcf97; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#11161f; --ink:#e7ecf5; --muted:#9aa6bc; --line:#2c3547;
+  --accent:#8fb2f2; --accent-soft:#1b2740; --mark:#e2b83c; --mark-soft:#2e2814; --ok:#6fcf97; color-scheme:dark}
+
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.85}
+.wrap{max-width:820px;margin:0 auto;padding-inline:20px;padding-block:32px 64px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.35;margin:0}
+h1{font-size:1.9rem;font-weight:900;letter-spacing:.02em}
+h2{font-size:1.3rem;font-weight:700;display:flex;gap:.6em;align-items:baseline}
+h2 .no{font-family:var(--num);font-size:.85rem;color:var(--accent);letter-spacing:.08em}
+h3{font-size:1.02rem;font-weight:700}
+p{margin:0}
+section{border-top:2px solid var(--ink);padding-block:22px 6px;display:grid;gap:14px}
+.eyebrow{font-size:.78rem;letter-spacing:.14em;color:var(--muted)}
+header{display:grid;gap:10px;padding-bottom:22px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;color:var(--muted);font-size:.88rem}
+.lead{font-size:1.02rem}
+mark{background:linear-gradient(transparent 55%,var(--mark-soft) 55%);color:inherit;font-weight:700}
+.note{font-size:.82rem;color:var(--muted)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:.92rem}
+th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-family:var(--display);font-weight:700;background:var(--accent-soft)}
+td.n{font-family:var(--num);font-variant-numeric:tabular-nums;white-space:nowrap}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.box{border:1px solid var(--line);border-radius:6px;padding:14px 16px;display:grid;gap:6px;min-width:0}
+.box.key{border-color:var(--accent);background:var(--accent-soft)}
+ul,ol{margin:0;padding-left:1.3em;display:grid;gap:4px}
+.tl{display:grid;gap:0;border-left:3px solid var(--accent);margin-left:6px}
+.tl > div{position:relative;padding:4px 0 14px 20px;display:grid;gap:2px}
+.tl > div::before{content:"";position:absolute;left:-8.5px;top:12px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--accent)}
+.tl > div.goal::before{background:var(--mark);border-color:var(--mark)}
+.tl .when{font-family:var(--num);font-size:.85rem;color:var(--accent)}
+.fill{display:grid;grid-template-columns:9em 1fr;border-top:1px solid var(--line)}
+.fill > *{border-bottom:1px solid var(--line);padding:9px 8px}
+.fill dt{font-weight:700;background:var(--accent-soft)}
+.fill dd{margin:0;color:var(--muted);font-size:.85rem;min-height:1.6em}
+.check li{list-style:"□  "}
+footer{margin-top:26px;font-size:.8rem;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+@media (max-width:520px){.fill{grid-template-columns:7em 1fr} h1{font-size:1.55rem}}
+@media print{
+  :root{--paper:#fff;--ink:#111;--muted:#444;--accent:#1f4fa8;--accent-soft:#eef3fc;--mark-soft:#fbefc4;color-scheme:light}
+  body{font-size:10.5pt} .wrap{padding:0;max-width:none}
+  section{break-inside:avoid-page} .page-break{break-before:page}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">保護者様向け ご案内資料｜2026年10月</p>
+  <h1>英検対策のご提案<br>芦屋高校 1・2年生のための合格プラン</h1>
+  <p class="meta"><span>対象：兵庫県立芦屋高等学校 在籍生</span><span>作成：教室長</span></p>
+  <p class="lead">英検は今、<mark>大学入試の「出願資格」や「英語の得点」として使える資格</mark>になっています。高校1・2年生のうちに取っておくと、受験の選択肢が大きく広がります。本資料では、入試での使われ方、目標にすべき級、合格までの具体的なスケジュールをまとめました。</p>
+</header>
+
+<section>
+  <h2><span class="no">01</span>なぜ「高校生のうち」に英検なのか</h2>
+  <div class="grid2">
+    <div class="box key">
+      <h3>一般選抜で使える</h3>
+      <p>関西大学・関西学院大学などでは、英検のスコアが基準を満たせば英語外部試験利用の方式で出願できます。2027年度入試の例では<mark>「2級以上かつCSE1950点以上」</mark>が基準です。</p>
+    </div>
+    <div class="box">
+      <h3>推薦・総合型選抜で有利</h3>
+      <p>学校推薦型・総合型選抜では、英検2級以上を出願条件や評価対象にする大学が多くあります。準1級があれば評価はさらに上がります。</p>
+    </div>
+    <div class="box">
+      <h3>共通テスト利用でも</h3>
+      <p>大学・学部によっては、英検のスコアを英語の得点に換算したり、加点したりする方式があります。</p>
+    </div>
+    <div class="box">
+      <h3>高3になると時間がない</h3>
+      <p>高3は模試・定期テスト・受験対策で手一杯になります。英検は<mark>高2の冬までに目標級を取り切る</mark>のが理想です。</p>
+    </div>
+  </div>
+  <p class="note">※大学ごとの基準・有効期限（「受験日から2年以内」など）は年度で変わります。志望校が決まり次第、最新の募集要項を一緒に確認します。</p>
+</section>
+
+<section>
+  <h2><span class="no">02</span>目標にすべき級とスコア</h2>
+  <p>英検は合否だけでなく、<b>CSEスコア</b>（4技能ごとの点数）で評価されます。大学はこのスコアで基準を設けることが多くなっています。</p>
+  <div class="tbl"><table>
+    <thead><tr><th>級</th><th>レベルの目安</th><th>合格基準（CSE）</th><th>芦屋高校生の目標時期</th></tr></thead>
+    <tbody>
+      <tr><td>準2級</td><td>高校中級程度</td><td class="n">1728 / 2400</td><td>高1の秋まで（未取得ならすぐに）</td></tr>
+      <tr><td>準2級プラス</td><td>準2級と2級の間（2025年度新設）</td><td class="n">—</td><td>2級への中間目標として活用</td></tr>
+      <tr><td><b>2級</b></td><td>高校卒業程度・入試で最も使われる級</td><td class="n"><b>1980 / 2600</b></td><td><mark>高1の冬〜高2の夏</mark></td></tr>
+      <tr><td>準1級</td><td>大学中級程度・推薦で強い武器</td><td class="n">2304 / 3000</td><td>高2の冬〜高3の夏（上位志望なら）</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">※2級の合格基準は一次（R・L・W）1520点、二次（面接）460点。準1級は一次1792点、二次512点。</p>
+</section>
+
+<section>
+  <h2><span class="no">03</span>2024年度から変わった2級の中身</h2>
+  <p>2024年度のリニューアルで、<mark>英作文が1題から2題（要約＋意見）に増えました</mark>。語彙問題は減り、「読んで、まとめて、書く」力がより問われるようになっています。</p>
+  <div class="tbl"><table>
+    <thead><tr><th>技能</th><th>出題内容</th><th>つまずきやすい点</th></tr></thead>
+    <tbody>
+      <tr><td>Reading</td><td>語彙・長文の空所補充・内容一致</td><td>高校の教科書より難しい語彙。単語帳の計画的な暗記が必須</td></tr>
+      <tr><td><b>Writing</b></td><td>要約問題＋意見論述（筆記は合計85分）</td><td><b>独学では採点できない。</b>添削を受けた量で得点が決まる</td></tr>
+      <tr><td>Listening</td><td>会話文・説明文（約25分）</td><td>音声を毎日聞く習慣がないと伸びにくい</td></tr>
+      <tr><td>Speaking</td><td>二次試験：面接（約7分）</td><td>一次合格後、約1か月で仕上げる必要がある</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="page-break">
+  <h2><span class="no">04</span>次の受験までのスケジュール（第3回・2級受験の場合）</h2>
+  <p>次の本会場試験は<mark>2027年1月24日（日）</mark>です。申込期間は2026年10月30日〜12月14日。今から始めると約16週間あります。</p>
+  <div class="tl">
+    <div><span class="when">10月 前半</span><h3>現状診断</h3><p>過去問1回分で4技能の現在地を測定。単語の定着度も確認し、学習計画を作成します。</p></div>
+    <div><span class="when">10月後半〜11月</span><h3>語彙と長文の土台づくり</h3><p>単語は毎週範囲を決めて授業内テスト。長文は「根拠に線を引く」解き方を身につけます。</p></div>
+    <div><span class="when">12月</span><h3>ライティング集中</h3><p>要約・意見論述を毎週提出し、講師が添削。型（構成）を覚えて、時間内に書き切る練習をします。</p></div>
+    <div><span class="when">1月</span><h3>過去問演習と時間配分</h3><p>本番と同じ時間で通し演習。冬休みの学校課題と並行できるよう配分します。</p></div>
+    <div class="goal"><span class="when">2027年1月24日</span><h3>一次試験</h3></div>
+    <div><span class="when">2月</span><h3>二次（面接）対策</h3><p>入室から退室までを講師と模擬面接。音読・質問への答え方を反復します。</p></div>
+    <div class="goal"><span class="when">3月上旬</span><h3>二次試験 → 2級合格</h3></div>
+  </div>
+  <p class="note">※英検S-CBT（パソコン受験）は毎月実施があり、日程の都合に合わせやすい方式です。部活や学校行事の予定を見て、本会場とS-CBTのどちらで受けるかをご相談ください。</p>
+</section>
+
+<section>
+  <h2><span class="no">05</span>学年別のロードマップ</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3>高1の場合</h3>
+      <ol>
+        <li>2027年1月：準2級プラス or 2級</li>
+        <li>2027年6月：2級を確実に取得</li>
+        <li>2027年10月〜：準1級に挑戦</li>
+        <li>高3は受験英語に集中</li>
+      </ol>
+      <p class="note">時間に余裕があるため、2級を取ったうえで準1級まで狙えます。</p>
+    </div>
+    <div class="box key">
+      <h3>高2の場合</h3>
+      <ol>
+        <li>2027年1月：2級（最優先）</li>
+        <li>不合格でも6月で再挑戦</li>
+        <li>2級取得後、スコアの上積みや準1級を検討</li>
+        <li>高3春からは一般入試の英語へ移行</li>
+      </ol>
+      <p class="note">入試で使えるのは「受験日から2年以内」などの期限がある大学が多く、高2での取得は時期としても最適です。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="no">06</span>当塾（個別指導）でできること</h2>
+  <div class="grid2">
+    <div class="box"><h3>ライティング添削</h3><p>合否を分ける要約・意見論述を、毎回の授業で添削します。独学で最も伸ばしにくい部分です。</p></div>
+    <div class="box"><h3>面接の模擬練習</h3><p>一次合格後すぐに、講師と本番形式で練習します。</p></div>
+    <div class="box"><h3>定期テストとの両立</h3><p>芦屋高校の定期テスト前は学校の範囲に切り替えるなど、時期によって配分を調整します。</p></div>
+    <div class="box"><h3>ご兄弟での通塾</h3><p>弟さんの様子と合わせてご家庭と連絡を取り合えます。送迎や曜日のご相談もしやすくなります。</p></div>
+  </div>
+</section>
+
+<section class="page-break">
+  <h2><span class="no">07</span>本日お伺いしたいこと</h2>
+  <dl class="fill">
+    <dt>学年</dt><dd>高1 ・ 高2</dd>
+    <dt>取得済みの級</dt><dd>級：　　　　 ／ CSEスコア：　　　　</dd>
+    <dt>第2回の受験</dt><dd>受けた ・ 受けていない（結果発表待ち：級　　　）</dd>
+    <dt>苦手な技能</dt><dd>R ・ W ・ L ・ S</dd>
+    <dt>志望校・方式</dt><dd>大学：　　　　　　 ／ 一般 ・ 推薦 ・ 総合型 ・ 未定</dd>
+    <dt>部活・予定</dt><dd>部活：　　　　　 ／ 通塾できる曜日：</dd>
+    <dt>英語の成績</dt><dd>直近の定期テスト：　　 点 ／ 模試：</dd>
+  </dl>
+</section>
+
+<section>
+  <h2><span class="no">08</span>コースのご提案</h2>
+  <dl class="fill">
+    <dt>コース</dt><dd>英検2級対策コース（個別）</dd>
+    <dt>回数・時間</dt><dd>週　　回 ／ 1回　　分</dd>
+    <dt>月謝</dt><dd>　　　　　　円（税込）</dd>
+    <dt>兄弟割引</dt><dd></dd>
+    <dt>教材費</dt><dd></dd>
+    <dt>開始日</dt><dd>　　月　　日〜（体験授業：　　月　　日）</dd>
+  </dl>
+  <ul class="check">
+    <li>第3回（1/24）の申込：10月30日〜12月14日</li>
+    <li>体験授業で現状診断（過去問）を実施</li>
+    <li>志望校の英検利用条件を確認</li>
+  </ul>
+</section>
+
+<footer>試験日程・合格基準・大学の利用条件は、2026年10月時点で公表されている情報をもとにしています。最新情報は日本英語検定協会および各大学の募集要項でご確認ください。</footer>
+</div>
