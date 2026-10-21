@@ -20,11 +20,14 @@ const run = (text, o = {}) => new TextRun({
   text, font: { ascii: F, eastAsia: F, hAnsi: F, cs: F },
   size: o.size || S, bold: o.bold, underline: o.u ? {} : undefined, break: o.br ? 1 : undefined,
 });
-// 文章を「。」ごとに改行した TextRun 配列にする
-const runs = (text, o = {}) => sentences(text).map((s, i) => run(s, { ...o, br: i > 0 }));
+// 「。」ごとに「段落」を分ける（Shift+Enter の改行は使わない。
+// 日本語Wordは両端揃えのため、行内改行だと字間が引き伸ばされる）
+// first: 1文目の段落設定 / rest: 2文目以降の段落設定
+const paras = (text, ro, first, rest) =>
+  sentences(text).map((s, i) => P([run(s, ro)], i === 0 ? first : { ...first, ...rest }));
 
 const P = (children, o = {}) => new Paragraph({
-  children, alignment: o.align, indent: o.indent, keepNext: o.keepNext,
+  children, alignment: o.align || AlignmentType.LEFT, indent: o.indent, keepNext: o.keepNext,
   spacing: { before: o.before || 0, after: o.after || 0 },
   heading: o.heading,
 });
@@ -38,12 +41,12 @@ const title = (text, subtitle) => [
   P([run(text, { size: 28, bold: true })], { align: AlignmentType.CENTER, before: 120 }),
   ...(subtitle ? [center(subtitle)] : []),
 ];
-const body = (text) => P(runs(text), { indent: { left: 210 }, after: 60 });         // 本文（「。」で改行）
+const body = (text) => paras(text, {}, { indent: { left: 210 } }, {});                // 本文（「。」で段落を分ける）
 const head = (text) => P([run(text, { bold: true })], { before: 240, after: 60, keepNext: true, heading: 'Heading1' });   // １．見出し
 const sub = (text) => P([run(text, { bold: true })], { before: 120, after: 40, keepNext: true, indent: { left: 210 }, heading: 'Heading2' }); // （１）小見出し
-const item = (text, mark = '・') => P(runs(mark + text), { indent: { left: 420, hanging: 210 } });  // 箇条書き
+const item = (text, mark = '・') => paras(mark + text, {}, { indent: { left: 420, hanging: 210 } }, { indent: { left: 420 } });  // 箇条書き
 const check = (text) => item(text, '□');
-const note = (text) => P(runs(text, { size: 18 }), { before: 40, indent: { left: 420, hanging: 210 } }); // ※注記（9pt）
+const note = (text) => paras(text, { size: 18 }, { before: 40, indent: { left: 420, hanging: 210 } }, { before: 0, indent: { left: 420 } }); // ※注記（9pt）
 const ki = () => center('記');
 const ijo = () => right('以上');
 const pageBreak = () => new Paragraph({ children: [new PageBreak()] });
@@ -101,18 +104,19 @@ function frame(lines) {
     rows: [new TableRow({ cantSplit: true, children: [new TableCell({
       width: { size: W - 210, type: WidthType.DXA }, borders,
       margins: { top: 100, bottom: 100, left: 160, right: 160 },
-      children: lines.map((l, i) => new Paragraph({
-        indent: i ? { left: 210, hanging: 210 } : undefined,
-        children: i ? runs(l) : [run(l, { bold: true })],
-      })),
+      children: lines.flatMap((l, i) => i === 0
+        ? [P([run(l, { bold: true })])]
+        : paras(l, {}, { indent: { left: 210, hanging: 210 } }, { indent: { left: 210 } })),
     })] })],
   });
 }
 
 // ---------- 出力 ----------
 function makeDoc(children) {
+  children = children.flat(Infinity);
   const font = { ascii: F, eastAsia: F, hAnsi: F, cs: F };
   return new Document({
+    compatibility: { doNotExpandShiftReturn: true },
     styles: {
       default: { document: { run: { font, size: S } } },
       paragraphStyles: [
@@ -140,6 +144,6 @@ async function save(children, path) {
 }
 
 module.exports = {
-  W, S, sentences, run, runs, blank, right, left, center, title, body, head, sub, item, check, note,
+  W, S, sentences, run, paras, blank, right, left, center, title, body, head, sub, item, check, note,
   ki, ijo, pageBreak, letterHead, table, frame, makeDoc, save, AlignmentType,
 };
