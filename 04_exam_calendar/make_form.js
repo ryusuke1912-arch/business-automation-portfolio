@@ -35,7 +35,7 @@ function page({ grade, name }) {
       ['氏名', { v: `${nameText}` }],
     ], { firstCol: true, noHead: true, rowH: 520, mid: [] }),
     J.head('１．受験する学校'),
-    J.table([600, 5600, 2944], rows, { mid: [0, 2], rowH: 600 }),
+    J.table([600, 5600, 2944], rows, { mid: [0, 2], rowH: 560 }),
     J.note('※ 受験校を追加したり取りやめたりしたときは、すぐに教室長へ伝えてください。'),
     J.head('２．先生に伝えておきたいこと（不安な科目、面接の有無など）'),
     J.table([J.W - 210], [['\n\n\n']], { noHead: true }),
