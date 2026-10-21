@@ -9,3 +9,9 @@ venv/
 .DS_Store
 Thumbs.db
 ~$*.xlsx
+
+# 入試カレンダー：実際の生徒名を含むファイルは公開しない
+04_exam_calendar/names.csv
+04_exam_calendar/入試日程.csv
+04_exam_calendar/入試カレンダー.xlsx
+04_exam_calendar/入試日程_記入用紙_名前入り.docx
