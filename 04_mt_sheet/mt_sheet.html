@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ミーティング用紙 A4縦変換</title>
+<title>ミーティング用紙 縦1枚変換</title>
 <style>
 :root{
   --ink:#111; --sub:#555; --line:#222; --soft:#e9edf2; --head:#d9dee5; --accent:#c00;
@@ -22,7 +22,7 @@ html,body{margin:0;background:#cfd4da;color:var(--ink);
 #pick{background:#fff;border:1px solid #9ca3af}
 #print{background:var(--btn);color:#fff;font-weight:bold}
 #print:disabled{background:#9ca3af;cursor:default}
-#bar input[type=date]{font:inherit;padding:4px}
+#bar input[type=date],#bar select{font:inherit;padding:4px}
 #bar input[type=range]{width:110px}
 #msg{color:#b45309;font-size:13px;flex-basis:100%}
 #msg:empty{display:none}
@@ -31,17 +31,20 @@ html,body{margin:0;background:#cfd4da;color:var(--ink);
 #drop.over{border-color:var(--btn);background:#eff6ff}
 #drop b{font-size:18px}
 
-/* ---------- A4用紙 ---------- */
+/* ---------- 用紙 ---------- */
 #pages{padding:24px 0 60px}
-.page{width:210mm;height:297mm;margin:0 auto 24px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.25);
-  padding:9mm 10mm;overflow:hidden;position:relative}
-.sheet{height:100%;display:flex;flex-direction:column;gap:2.6mm;font-size:calc(10pt * var(--fs,1));line-height:1.35}
+/* 用紙サイズは --pw/--ph（A4: 210×297 / B5: 182×257）で切り替え */
+.page{--k:1;--pw:210mm;--ph:297mm;--py:9mm;--px:10mm;--namew:62mm;--sidew:66mm;
+  width:var(--pw);height:var(--ph);margin:0 auto 24px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.25);
+  padding:var(--py) var(--px);overflow:hidden;position:relative}
+body.b5 .page{--k:.86;--pw:182mm;--ph:257mm;--py:7mm;--px:8mm;--namew:50mm;--sidew:56mm}
+.sheet{height:100%;display:flex;flex-direction:column;gap:calc(2.6mm * var(--k));font-size:calc(10pt * var(--fs,1));line-height:1.35}
 [contenteditable]:focus{outline:2px solid #93c5fd;outline-offset:1px}
 
-.hdr{display:grid;grid-template-columns:auto 1fr 62mm;align-items:end;gap:4mm;border-bottom:2.5px solid var(--line);padding-bottom:1.6mm}
+.hdr{display:grid;grid-template-columns:auto 1fr var(--namew);align-items:end;gap:4mm;border-bottom:2.5px solid var(--line);padding-bottom:1.6mm}
 .hdr .date{font-size:1.9em;font-weight:bold;letter-spacing:.02em;white-space:nowrap}
 .hdr .ttl{font-size:1.3em;font-weight:bold}
-.hdr .name{font-size:1.2em;border-bottom:1px solid var(--line);background:var(--soft);padding:1mm 2mm 0.6mm;height:9mm;display:flex;align-items:flex-end}
+.hdr .name{font-size:1.2em;border-bottom:1px solid var(--line);background:var(--soft);padding:1mm 2mm 0.6mm;height:calc(9mm * var(--k));display:flex;align-items:flex-end}
 
 .box{border:1.6px solid var(--line)}
 .bh{background:var(--head);font-weight:bold;padding:1mm 2mm;border-bottom:1.2px solid var(--line);display:flex;gap:3mm;align-items:baseline;flex-wrap:wrap}
@@ -50,16 +53,16 @@ html,body{margin:0;background:#cfd4da;color:var(--ink);
 
 table{border-collapse:collapse;width:100%}
 td,th{border:1px solid var(--line);padding:.9mm 1.6mm;vertical-align:middle}
-.todo td{height:calc(8.6mm * var(--rh,1))}
+.todo td{height:calc(8.6mm * var(--rh,1) * var(--k))}
 .todo .no{width:8mm;text-align:center;font-weight:bold}
 .todo .ck{width:12mm;padding:0}
-.todo .ck span{display:block;width:6.5mm;height:6.5mm;border:1.4px solid var(--line);margin:auto}
+.todo .ck span{display:block;width:calc(6.5mm * var(--k));height:calc(6.5mm * var(--k));border:1.4px solid var(--line);margin:auto}
 .todo .tx{font-weight:bold;white-space:pre-wrap}
 
-.two{display:grid;grid-template-columns:1fr 66mm;gap:3mm;align-items:start}
+.two{display:grid;grid-template-columns:1fr var(--sidew);gap:3mm;align-items:start}
 .rit .who{padding:1.2mm 2mm;font-weight:bold;font-size:1.1em;border-bottom:1px solid var(--line)}
 .rit .no{width:9mm;text-align:center;font-size:1.25em}
-.rit td{height:7.4mm;font-size:.92em;font-weight:bold}
+.rit td{height:calc(7.4mm * var(--k));font-size:.92em;font-weight:bold}
 .rit table td{border-left:0}
 .rit table tr td:last-child{border-right:0}
 .rit table tr:last-child td{border-bottom:0}
@@ -79,10 +82,10 @@ td,th{border:1px solid var(--line);padding:.9mm 1.6mm;vertical-align:middle}
 .share{flex:1;display:flex;flex-direction:column;min-height:0}
 .share .body{flex:1;display:flex;flex-direction:column;padding:1.4mm 2mm 2mm;gap:1.2mm}
 .share .sub{font-weight:bold;margin-top:1mm}
-.share .wline{border-bottom:1px solid var(--line);min-height:7.5mm;padding:1mm 1mm 0;white-space:pre-wrap}
+.share .wline{border-bottom:1px solid var(--line);min-height:calc(7.5mm * var(--k));padding:1mm 1mm 0;white-space:pre-wrap}
 .share .note{white-space:pre-wrap;font-weight:bold}
-.share table td{height:7.2mm}
-.share .grow{flex:1;border:1px dashed #aaa;min-height:10mm;display:flex;align-items:flex-start;padding:1mm 2mm;color:#999;font-size:.85em}
+.share table td{height:calc(7.2mm * var(--k))}
+.share .grow{flex:1;border:1px dashed #aaa;min-height:calc(8mm * var(--k));display:flex;align-items:flex-start;padding:1mm 2mm;color:#999;font-size:.85em}
 
 .foot{text-align:right;font-weight:bold;font-size:1.25em}
 .foot span{background:#ffd966;border:1.4px solid #b08900;padding:.6mm 4mm}
@@ -90,9 +93,8 @@ td,th{border:1px solid var(--line);padding:.9mm 1.6mm;vertical-align:middle}
 .p2 h2{font-size:1.6em;margin:0 0 4mm}
 .p2 img{width:100%;display:block;border:1px solid #ccc;margin-bottom:4mm}
 .p2.rot .sheet{display:block}
-.p2.rot .rotbox{position:absolute;top:9mm;left:10mm;width:279mm;height:190mm;transform-origin:top left;transform:rotate(90deg) translateY(-100%)}
+.p2.rot .rotbox{position:absolute;top:var(--py);left:var(--px);width:calc(var(--ph) - 2*var(--py));height:calc(var(--pw) - 2*var(--px));transform-origin:top left;transform:rotate(90deg) translateY(-100%)}
 
-@page{size:A4 portrait;margin:0}
 @media print{
   html,body{background:#fff}
   #bar,#drop{display:none!important}
@@ -105,10 +107,12 @@ td,th{border:1px solid var(--line);padding:.9mm 1.6mm;vertical-align:middle}
   [contenteditable]:focus{outline:none}
 }
 </style>
+<style id="pagesize">@page{size:182mm 257mm;margin:0}</style>
 </head>
 <body>
 <div id="bar">
-  <h1>ミーティング用紙 → A4縦</h1>
+  <h1>ミーティング用紙 → 縦1枚</h1>
+  <label>用紙 <select id="paper"><option value="b5">B5縦</option><option value="a4">A4縦</option></select></label>
   <label id="pick" for="file">📂 Excelを選ぶ</label>
   <input id="file" type="file" accept=".xlsx,.xlsm" hidden>
   <label>日付 <input id="date" type="date"></label>
@@ -122,7 +126,7 @@ td,th{border:1px solid var(--line);padding:.9mm 1.6mm;vertical-align:middle}
 <div id="drop">
   <b>ここにミーティング用紙（.xlsx）をドラッグ＆ドロップ</b><br>
   または上の「📂 Excelを選ぶ」から選択してください。<br>
-  <span style="font-size:13px;color:#6b7280">読み込むとA4縦の用紙に自動で並べ替えます。用紙上の文字はクリックして直接修正できます。<br>
+  <span style="font-size:13px;color:#6b7280">読み込むとB5縦（またはA4縦）の用紙1枚に自動で並べ替えます。用紙上の文字はクリックして直接修正できます。<br>
   ※ファイルはこのPCの中だけで処理され、どこにも送信されません（ネット接続不要）。</span>
 </div>
 <div id="pages"></div>
@@ -331,7 +335,7 @@ function isHeading(c){ return c.text.length<=40 && (c.font.color==="#FF0000"||c.
 function colName(n){let s="";while(n>0){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=(n-m-1)/26;}return s;}
 
 /* =====================================================================
-   3. A4縦レイアウトに描画
+   3. 縦1枚のレイアウトに描画
    ===================================================================== */
 const esc=s=>s.replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
 // Excelで改行代わりに入れていた全角スペースの連続 → 改行
@@ -421,7 +425,7 @@ function render(){
   fit();
 }
 
-// A4 1枚に収まるよう文字サイズを自動調整
+// 用紙1枚に収まるよう文字サイズを自動調整
 function fit(){
   const sheet=document.querySelector(".page .sheet"); if(!sheet) return;
   const manual=+$("fs").value;
@@ -472,6 +476,17 @@ $("fsv").addEventListener("click",()=>{ fsAuto=true; fit(); });
 $("back").addEventListener("change",()=>{ const p=document.querySelector(".p2"); if(p) p.classList.toggle("off",!$("back").checked); });
 $("rot").addEventListener("change",()=>{ const p=document.querySelector(".p2"); if(p) p.classList.toggle("rot",$("rot").checked); });
 $("print").addEventListener("click",()=>window.print());
+
+// 用紙サイズ（前回の選択を記憶）
+function setPaper(v){
+  document.body.classList.toggle("b5",v==="b5");
+  $("pagesize").textContent=v==="b5"?"@page{size:182mm 257mm;margin:0}":"@page{size:210mm 297mm;margin:0}";
+  try{ localStorage.setItem("mtPaper",v); }catch(e){}
+  fit();
+}
+let paper="b5"; try{ paper=localStorage.getItem("mtPaper")||"b5"; }catch(e){}
+$("paper").value=paper; setPaper(paper);
+$("paper").addEventListener("change",e=>setPaper(e.target.value));
 </script>
 </body>
 </html>
