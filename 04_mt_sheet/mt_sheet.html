@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ミーティング用紙 A4縦変換</title>
+<style>
+:root{
+  --ink:#111; --sub:#555; --line:#222; --soft:#e9edf2; --head:#d9dee5; --accent:#c00;
+  --ui:#f3f4f6; --uiink:#1f2937; --btn:#2563eb;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#cfd4da;color:var(--ink);
+  font-family:"BIZ UDPGothic","Meiryo","Yu Gothic UI","Yu Gothic","Hiragino Kaku Gothic ProN",sans-serif}
+
+/* ---------- 操作バー（印刷されない） ---------- */
+#bar{position:sticky;top:0;z-index:10;background:var(--ui);color:var(--uiink);
+  border-bottom:1px solid #c7ccd3;padding:10px 16px;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;font-size:14px}
+#bar h1{font-size:15px;margin:0 8px 0 0}
+#bar label{display:flex;align-items:center;gap:6px}
+#bar button,#pick{font:inherit;border:0;border-radius:6px;padding:8px 14px;cursor:pointer}
+#pick{background:#fff;border:1px solid #9ca3af}
+#print{background:var(--btn);color:#fff;font-weight:bold}
+#print:disabled{background:#9ca3af;cursor:default}
+#bar input[type=date]{font:inherit;padding:4px}
+#bar input[type=range]{width:110px}
+#msg{color:#b45309;font-size:13px;flex-basis:100%}
+#msg:empty{display:none}
+#drop{margin:40px auto;max-width:640px;background:#fff;border:3px dashed #9ca3af;border-radius:12px;
+  padding:48px 24px;text-align:center;color:#374151;line-height:1.9}
+#drop.over{border-color:var(--btn);background:#eff6ff}
+#drop b{font-size:18px}
+
+/* ---------- A4用紙 ---------- */
+#pages{padding:24px 0 60px}
+.page{width:210mm;height:297mm;margin:0 auto 24px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.25);
+  padding:9mm 10mm;overflow:hidden;position:relative}
+.sheet{height:100%;display:flex;flex-direction:column;gap:2.6mm;font-size:calc(10pt * var(--fs,1));line-height:1.35}
+[contenteditable]:focus{outline:2px solid #93c5fd;outline-offset:1px}
+
+.hdr{display:grid;grid-template-columns:auto 1fr 62mm;align-items:end;gap:4mm;border-bottom:2.5px solid var(--line);padding-bottom:1.6mm}
+.hdr .date{font-size:1.9em;font-weight:bold;letter-spacing:.02em;white-space:nowrap}
+.hdr .ttl{font-size:1.3em;font-weight:bold}
+.hdr .name{font-size:1.2em;border-bottom:1px solid var(--line);background:var(--soft);padding:1mm 2mm 0.6mm;height:9mm;display:flex;align-items:flex-end}
+
+.box{border:1.6px solid var(--line)}
+.bh{background:var(--head);font-weight:bold;padding:1mm 2mm;border-bottom:1.2px solid var(--line);display:flex;gap:3mm;align-items:baseline;flex-wrap:wrap}
+.bh small{font-weight:bold;font-size:.86em}
+.red{color:var(--accent)}
+
+table{border-collapse:collapse;width:100%}
+td,th{border:1px solid var(--line);padding:.9mm 1.6mm;vertical-align:middle}
+.todo td{height:calc(8.6mm * var(--rh,1))}
+.todo .no{width:8mm;text-align:center;font-weight:bold}
+.todo .ck{width:12mm;padding:0}
+.todo .ck span{display:block;width:6.5mm;height:6.5mm;border:1.4px solid var(--line);margin:auto}
+.todo .tx{font-weight:bold;white-space:pre-wrap}
+
+.two{display:grid;grid-template-columns:1fr 66mm;gap:3mm;align-items:start}
+.rit .who{padding:1.2mm 2mm;font-weight:bold;font-size:1.1em;border-bottom:1px solid var(--line)}
+.rit .no{width:9mm;text-align:center;font-size:1.25em}
+.rit td{height:7.4mm;font-size:.92em;font-weight:bold}
+.rit table td{border-left:0}
+.rit table tr td:last-child{border-right:0}
+.rit table tr:last-child td{border-bottom:0}
+.rit table tr:first-child td{border-top:0}
+.tests ul{margin:0;padding:1.4mm 2mm 1.6mm 6mm;font-weight:bold;color:var(--accent)}
+.tests li{margin:.4mm 0}
+
+.cal{margin-top:2mm}
+.cal .cap{font-weight:bold;text-align:center;padding:.6mm 0;background:var(--head);border-bottom:1px solid var(--line)}
+.cal table td,.cal table th{border:0;border-bottom:1px solid #ccc;text-align:center;padding:.5mm 0;font-size:.95em}
+.cal th{font-weight:normal;color:var(--sub)}
+.cal .sun,.cal .hol{color:var(--accent)}
+.cal .sat{color:#1d4ed8}
+.cal .today b{display:inline-block;min-width:5.5mm;border:1.6px solid var(--line);border-radius:50%}
+.calimg img{width:100%;display:block}
+
+.share{flex:1;display:flex;flex-direction:column;min-height:0}
+.share .body{flex:1;display:flex;flex-direction:column;padding:1.4mm 2mm 2mm;gap:1.2mm}
+.share .sub{font-weight:bold;margin-top:1mm}
+.share .wline{border-bottom:1px solid var(--line);min-height:7.5mm;padding:1mm 1mm 0;white-space:pre-wrap}
+.share .note{white-space:pre-wrap;font-weight:bold}
+.share table td{height:7.2mm}
+.share .grow{flex:1;border:1px dashed #aaa;min-height:10mm;display:flex;align-items:flex-start;padding:1mm 2mm;color:#999;font-size:.85em}
+
+.foot{text-align:right;font-weight:bold;font-size:1.25em}
+.foot span{background:#ffd966;border:1.4px solid #b08900;padding:.6mm 4mm}
+
+.p2 h2{font-size:1.6em;margin:0 0 4mm}
+.p2 img{width:100%;display:block;border:1px solid #ccc;margin-bottom:4mm}
+.p2.rot .sheet{display:block}
+.p2.rot .rotbox{position:absolute;top:9mm;left:10mm;width:279mm;height:190mm;transform-origin:top left;transform:rotate(90deg) translateY(-100%)}
+
+@page{size:A4 portrait;margin:0}
+@media print{
+  html,body{background:#fff}
+  #bar,#drop{display:none!important}
+  #pages{padding:0}
+  .page{margin:0;box-shadow:none;page-break-after:always;break-after:page}
+  .page:last-child{page-break-after:auto;break-after:auto}
+  .page.off{display:none}
+  .share .grow{border-color:transparent;color:transparent}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  [contenteditable]:focus{outline:none}
+}
+</style>
+</head>
+<body>
+<div id="bar">
+  <h1>ミーティング用紙 → A4縦</h1>
+  <label id="pick" for="file">📂 Excelを選ぶ</label>
+  <input id="file" type="file" accept=".xlsx,.xlsm" hidden>
+  <label>日付 <input id="date" type="date"></label>
+  <label>文字サイズ <input id="fs" type="range" min="80" max="130" step="1" value="100"><span id="fsv">自動</span></label>
+  <label><input id="back" type="checkbox" checked> 裏面（受験生カレンダー）も印刷</label>
+  <label><input id="rot" type="checkbox" checked> 裏面を横向きで大きく</label>
+  <button id="print" disabled>🖨 印刷</button>
+  <div id="msg"></div>
+</div>
+
+<div id="drop">
+  <b>ここにミーティング用紙（.xlsx）をドラッグ＆ドロップ</b><br>
+  または上の「📂 Excelを選ぶ」から選択してください。<br>
+  <span style="font-size:13px;color:#6b7280">読み込むとA4縦の用紙に自動で並べ替えます。用紙上の文字はクリックして直接修正できます。<br>
+  ※ファイルはこのPCの中だけで処理され、どこにも送信されません（ネット接続不要）。</span>
+</div>
+<div id="pages"></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   1. xlsx（zip）をブラウザだけで開く：外部ライブラリなし
+   ===================================================================== */
+async function unzip(buf){
+  const dv=new DataView(buf), u8=new Uint8Array(buf), files={};
+  let eocd=-1;
+  for(let i=buf.byteLength-22;i>=Math.max(0,buf.byteLength-70000);i--){ if(dv.getUint32(i,true)===0x06054b50){eocd=i;break;} }
+  if(eocd<0) throw new Error("xlsxファイルとして読めませんでした");
+  let p=dv.getUint32(eocd+16,true); const n=dv.getUint16(eocd+10,true);
+  const dec=new TextDecoder();
+  for(let k=0;k<n;k++){
+    const method=dv.getUint16(p+10,true), csize=dv.getUint32(p+20,true),
+          nlen=dv.getUint16(p+28,true), elen=dv.getUint16(p+30,true), clen=dv.getUint16(p+32,true),
+          off=dv.getUint32(p+42,true);
+    const name=dec.decode(u8.subarray(p+46,p+46+nlen));
+    files[name]={method,csize,off};
+    p+=46+nlen+elen+clen;
+  }
+  async function get(name){
+    const f=files[name]; if(!f) return null;
+    const ln=dv.getUint16(f.off+26,true), le=dv.getUint16(f.off+28,true);
+    const data=u8.subarray(f.off+30+ln+le,f.off+30+ln+le+f.csize);
+    if(f.method===0) return data;
+    const ds=new DecompressionStream("deflate-raw");
+    return new Uint8Array(await new Response(new Blob([data]).stream().pipeThrough(ds)).arrayBuffer());
+  }
+  return {get, names:Object.keys(files)};
+}
+const NS="*";
+const qa=(el,tag)=>Array.from(el.getElementsByTagNameNS(NS,tag));
+const q1=(el,tag)=>el.getElementsByTagNameNS(NS,tag)[0]||null;
+const kids=(el,tag)=>Array.from(el.children).filter(c=>c.localName===tag);
+async function xml(z,path){ const b=await z.get(path); return b?new DOMParser().parseFromString(new TextDecoder().decode(b),"application/xml"):null; }
+function resolve(base,target){
+  if(target.startsWith("/")) return target.slice(1);
+  const parts=base.split("/"); parts.pop();
+  for(const s of target.split("/")){ if(s==="..") parts.pop(); else if(s!==".") parts.push(s); }
+  return parts.join("/");
+}
+async function rels(z,path){
+  const p=path.replace(/([^/]+)$/,"_rels/$1.rels"), d=await xml(z,p), m={};
+  if(d) for(const r of qa(d,"Relationship")) m[r.getAttribute("Id")]={target:resolve(path,r.getAttribute("Target")),type:r.getAttribute("Type")||""};
+  return m;
+}
+const col2n=s=>{let n=0;for(const ch of s) n=n*26+ch.charCodeAt(0)-64;return n;};
+const ref=a=>{const m=/^([A-Z]+)(\d+)$/.exec(a);return {c:col2n(m[1]),r:+m[2]};};
+
+const IDX={2:"#FF0000",10:"#FF0000",4:"#0000FF",12:"#0000FF",3:"#00B050",17:"#008000"};
+function colorOf(el){
+  if(!el) return null;
+  const rgb=el.getAttribute("rgb"); if(rgb) return "#"+rgb.slice(-6);
+  const ix=el.getAttribute("indexed"); if(ix&&IDX[ix]) return IDX[ix];
+  return null;
+}
+function runsOf(si){
+  const out=[];
+  for(const ch of si.children){
+    if(ch.localName==="t") out.push({t:ch.textContent});
+    else if(ch.localName==="r"){
+      const pr=kids(ch,"rPr")[0], t=kids(ch,"t")[0]; if(!t) continue;
+      out.push({t:t.textContent,color:pr?colorOf(kids(pr,"color")[0]):null,b:pr?!!kids(pr,"b")[0]:undefined});
+    }
+  }
+  return out; // ふりがな(rPh)は除外
+}
+
+async function readBook(buf){
+  const z=await unzip(buf);
+  const wb=await xml(z,"xl/workbook.xml"), wbr=await rels(z,"xl/workbook.xml");
+  const sh=q1(wb,"sheet"); const rid=sh.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships","id")||sh.getAttribute("r:id");
+  const sheetPath=wbr[rid].target;
+  // 共有文字列
+  const ss=[]; const ssd=await xml(z,"xl/sharedStrings.xml");
+  if(ssd) for(const si of qa(ssd,"si")) ss.push(runsOf(si));
+  // スタイル（文字色・太字）
+  const fonts=[], xfs=[]; const st=await xml(z,"xl/styles.xml");
+  if(st){
+    const fe=q1(st,"fonts"); if(fe) for(const f of kids(fe,"font")) fonts.push({color:colorOf(kids(f,"color")[0]),b:!!kids(f,"b")[0],sz:+(kids(f,"sz")[0]?.getAttribute("val")||11)});
+    const ce=q1(st,"cellXfs"); if(ce) for(const x of kids(ce,"xf")) xfs.push(+x.getAttribute("fontId")||0);
+  }
+  const d=await xml(z,sheetPath), cells={};
+  for(const c of qa(d,"c")){
+    const a=c.getAttribute("r"), t=c.getAttribute("t"), v=q1(c,"v"), font=fonts[xfs[+c.getAttribute("s")||0]]||{};
+    let runs=null, num=null;
+    if(t==="s"&&v) runs=ss[+v.textContent]||[];
+    else if(t==="inlineStr"){ const is=q1(c,"is"); runs=is?runsOf(is):[]; }
+    else if(t==="str"&&v) runs=[{t:v.textContent}];
+    else if(v){ num=+v.textContent; runs=[{t:v.textContent}]; }
+    if(!runs) continue;
+    const text=runs.map(r=>r.t).join("");
+    if(!text.trim()) continue;
+    const {r,c:cc}=ref(a);
+    cells[a]={r,c:cc,runs,text,num,font,f:q1(c,"f")?.textContent||""};
+  }
+  const merges={}, covered=new Set();
+  for(const m of qa(d,"mergeCell")){
+    const [s,e]=m.getAttribute("ref").split(":"); if(!e) continue;
+    const A=ref(s),B=ref(e); merges[s]={r1:A.r,c1:A.c,r2:B.r,c2:B.c};
+    for(let r=A.r;r<=B.r;r++) for(let c=A.c;c<=B.c;c++) if(r!==A.r||c!==A.c) covered.add(r+","+c);
+  }
+  // 図形・画像
+  const shapes=[], images=[]; const sr=await rels(z,sheetPath);
+  for(const k in sr){ if(!/drawing$/.test(sr[k].type)) continue;
+    const dp=sr[k].target, dd=await xml(z,dp), dr=await rels(z,dp); if(!dd) continue;
+    for(const anc of [...qa(dd,"twoCellAnchor"),...qa(dd,"oneCellAnchor")]){
+      const fr=q1(anc,"from"); const row=fr?+q1(fr,"row").textContent+1:0, col=fr?+q1(fr,"col").textContent+1:0;
+      const blip=q1(anc,"blip");
+      if(blip){
+        const id=blip.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships","embed");
+        const tg=dr[id]?.target; if(!tg) continue;
+        const ext=tg.split(".").pop().toLowerCase();
+        const mime={png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",gif:"image/gif",bmp:"image/bmp"}[ext];
+        if(mime){ const b=await z.get(tg); images.push({row,col,url:URL.createObjectURL(new Blob([b],{type:mime}))}); }
+        else images.push({row,col,url:null,ext});
+        continue;
+      }
+      const tx=q1(anc,"txBody");
+      if(tx){ const paras=qa(tx,"p").map(p=>qa(p,"t").map(t=>t.textContent).join("")).map(s=>s.replace(/[\s　]+$/,"")).filter(s=>s.trim());
+        if(paras.length) shapes.push({row,col,paras}); }
+    }
+  }
+  return {cells,merges,covered,shapes,images};
+}
+
+/* =====================================================================
+   2. 用紙の中身を「場所」ではなく「見出し」から読み取る
+   ===================================================================== */
+const CIRC="①②③④⑤⑥⑦⑧⑨⑩";
+function extract(bk){
+  const {cells,merges}=bk;
+  const list=Object.values(cells).sort((a,b)=>a.r-b.r||a.c-b.c);
+  const find=re=>list.find(c=>re.test(c.text));
+  const at=(r,c)=>cells[colName(c)+r];
+  const span=c=>{const m=merges[colName(c.c)+c.r];return m?m.c2-m.c1+1:1;};
+
+  const hRit=find(/立礼担当/), hExp=find(/説明事項/), hShare=find(/共有事項/), hTest=find(/定期テスト$|中学生.*テスト/), hBack=find(/受験生カレンダー/);
+  const backRow=hBack?hBack.r:1e9;
+  // 左右の境目：伝達事項の番号列（右半分にある数値 1）
+  const one=list.find(c=>c.num===1&&c.c>10&&c.r<backRow);
+  const numCol=one?one.c:25, splitCol=numCol-1;
+
+  // --- 本日の伝達事項 ---
+  const todo=[]; const todoEnd=hTest&&hTest.c>=splitCol?hTest.r:backRow;
+  for(const c of list){ if(c.c!==numCol||c.num==null||c.r>=todoEnd) continue;
+    const body=list.find(x=>x.r===c.r&&x.c>numCol&&x.c<numCol+6);
+    todo.push({no:c.text,cell:body||null}); }
+
+  // --- 立礼担当 ---
+  const slots=[]; const expCol=hExp?hExp.c:9; const ritEnd=hShare?hShare.r:backRow;
+  for(const c of list){ if(c.c<splitCol&&c.r<ritEnd&&c.text.length<=2&&CIRC.includes(c.text.trim()))
+      slots.push({label:c.text.trim(),r:c.r,exp:at(c.r,expCol)||null}); }
+  const firstSlot=slots.length?slots[0].r:0;
+  const who=list.filter(c=>c.r>=firstSlot&&c.r<ritEnd&&c.c>1&&c.c<expCol&&!CIRC.includes(c.text.trim())).map(c=>c.text.trim());
+
+  // --- 中学生 定期テスト ---
+  const tests=[];
+  if(hTest) for(const c of list){ if(c.r>hTest.r&&c.r<backRow&&c.c>=splitCol&&c!==hTest) tests.push(c); }
+
+  // --- 共有事項（左側の下半分を上から順に） ---
+  const share=[];
+  if(hShare){
+    const rows={};
+    for(let r=hShare.r+1;r<backRow&&r<hShare.r+60;r++){
+      const starts=[];
+      for(let c=1;c<splitCol;c++){
+        const key=colName(c)+r, m=merges[key], cell=cells[key];
+        if(bk.covered.has(r+","+c)) continue;
+        if(m||cell) starts.push({c,w:m?m.c2-m.c1+1:1,cell:cell||null,h:m?m.r2-m.r1+1:1});
+      }
+      if(starts.length) rows[r]=starts;
+    }
+    for(const r of Object.keys(rows).map(Number).sort((a,b)=>a-b)){
+      const s=rows[r];
+      const merged=s.filter(x=>x.w>1||x.h>1);
+      if(merged.length>=2){ share.push({type:"row",cells:merged.map(x=>x.cell)}); continue; }
+      if(merged.length===1&&merged[0].w>=10){
+        const cell=merged[0].cell;
+        if(cell&&isHeading(cell)) share.push({type:"sub",cell});
+        else share.push({type:cell?"note":"line",cell}); continue; }
+      for(const x of s) if(x.cell) share.push({type:isHeading(x.cell)?"sub":"note",cell:x.cell});
+    }
+  }
+  // 図形の文字
+  const shTodo=bk.shapes.find(s=>s.paras.some(p=>/伝達事項/.test(p)));
+  const shBack=bk.shapes.find(s=>s.paras.some(p=>/裏は/.test(p)));
+  const shOther=bk.shapes.filter(s=>s!==shTodo&&s!==shBack);
+  return {
+    title:(find(/ミーティング用紙/)||{}).text||"ミーティング用紙",
+    todo, todoHead:shTodo?shTodo.paras:["●本日の伝達事項●"],
+    ritHead:hRit?hRit.text:"立礼担当", expHead:hExp?hExp.text:"", slots, who,
+    testHead:hTest?hTest.text:"", tests,
+    shareHead:hShare?hShare.text:"●共有事項●", share, shOther,
+    backHead:hBack?hBack.text:"", backNote:shBack?shBack.paras.join(" "):"",
+    backImgs:bk.images.filter(i=>i.url&&i.row>=backRow-1),
+    frontImgs:bk.images.filter(i=>i.url&&i.row<backRow-1),
+    hasVector:bk.images.some(i=>!i.url&&i.row<backRow-1)
+  };
+}
+function isHeading(c){ return c.text.length<=40 && (c.font.color==="#FF0000"||c.runs.some(r=>r.color==="#FF0000")); }
+function colName(n){let s="";while(n>0){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=(n-m-1)/26;}return s;}
+
+/* =====================================================================
+   3. A4縦レイアウトに描画
+   ===================================================================== */
+const esc=s=>s.replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+// Excelで改行代わりに入れていた全角スペースの連続 → 改行
+const tidy=s=>s.replace(/[　 ]{3,}/g,"\n").replace(/^\n+|\n+$/g,"");
+function rich(cell){
+  if(!cell) return "";
+  const base=cell.font.color&&cell.font.color!=="#000000"?cell.font.color:null;
+  let out="";
+  for(const r of cell.runs){
+    const col=r.color&&r.color!=="#000000"?r.color:null;
+    const t=esc(tidy(r.t)).replace(/\n/g,"<br>");
+    out+=col&&col!==base?`<span style="color:${col}">${t}</span>`:t;
+  }
+  return base?`<span style="color:${base}">${out}</span>`:out;
+}
+
+const WD="日月火水木金土";
+function fmtDate(d){return `${d.getMonth()+1}月${d.getDate()}日(${WD[d.getDay()]})`;}
+
+function holidays(y){
+  const H=new Set(), k=(m,d)=>`${m}-${d}`;
+  const nth=(m,n)=>{const f=new Date(y,m-1,1).getDay();return 1+((8-f)%7)+(n-1)*7;}; // 第n月曜
+  [[1,1],[2,11],[2,23],[4,29],[5,3],[5,4],[5,5],[8,11],[11,3],[11,23]].forEach(([m,d])=>H.add(k(m,d)));
+  H.add(k(1,nth(1,2)));H.add(k(7,nth(7,3)));H.add(k(9,nth(9,3)));H.add(k(10,nth(10,2)));
+  const t=y-1980,lp=Math.floor(t/4);
+  H.add(k(3,Math.floor(20.8431+0.242194*t-lp)));H.add(k(9,Math.floor(23.2488+0.242194*t-lp)));
+  const is=(m,d)=>H.has(k(m,d));
+  for(let m=1;m<=12;m++){const last=new Date(y,m,0).getDate();
+    for(let d=2;d<last;d++){ if(!is(m,d)&&is(m,d-1)&&is(m,d+1)&&new Date(y,m-1,d).getDay()!==0) H.add(k(m,d)); }}
+  for(const h of [...H]){ const [m,d]=h.split("-").map(Number);
+    if(new Date(y,m-1,d).getDay()===0){ let x=new Date(y,m-1,d+1); while(H.has(k(x.getMonth()+1,x.getDate()))) x.setDate(x.getDate()+1); H.add(k(x.getMonth()+1,x.getDate())); } }
+  return H;
+}
+function calendar(d){
+  const y=d.getFullYear(),m=d.getMonth(),H=holidays(y),first=new Date(y,m,1).getDay(),last=new Date(y,m+1,0).getDate();
+  let h=`<div class="cap">${y}年 ${m+1}月</div><table><tr>${[...WD].map((w,i)=>`<th class="${i===0?"sun":i===6?"sat":""}">${w}</th>`).join("")}</tr><tr>`;
+  for(let i=0;i<first;i++) h+="<td></td>";
+  for(let day=1;day<=last;day++){
+    const wd=(first+day-1)%7, cls=[wd===0?"sun":wd===6?"sat":"",H.has(`${m+1}-${day}`)?"hol":"",day===d.getDate()?"today":""].join(" ");
+    h+=`<td class="${cls}"><b>${day}</b></td>`; if(wd===6&&day<last) h+="</tr><tr>";
+  }
+  return h+"</tr></table>";
+}
+
+let DATA=null;
+function render(){
+  if(!DATA) return;
+  const D=DATA, d=dateVal();
+  const ce=' contenteditable="true" spellcheck="false"';
+  const todoHead=D.todoHead.map((p,i)=>i===0?`<span>${esc(p)}</span>`:`<small>${esc(p.replace(/[↓\s　]+$/,""))}</small>`).join("");
+  const todoRows=D.todo.map(t=>`<tr><td class="no">${esc(t.no)}</td><td class="tx"${ce}>${rich(t.cell)}</td><td class="ck"><span></span></td></tr>`).join("");
+  const exps=D.slots.map(s=>`<tr><td class="no">${s.label}</td><td${ce}>${rich(s.exp)}</td></tr>`).join("");
+  const whoTxt=D.who.join(" ").replace(/\s*先生$/,"");
+  const tests=D.tests.map(c=>`<li${ce}>${rich(c)}</li>`).join("");
+  let share="", tbl=[];
+  const flush=()=>{ if(tbl.length){ share+=`<table>${tbl.join("")}</table>`; tbl=[]; } };
+  for(const it of D.share){
+    if(it.type==="row"){ tbl.push(`<tr>${it.cells.map((c,i)=>`<td${ce} style="${i===0?"width:28%":i===1?"width:14%":""}">${rich(c)}</td>`).join("")}</tr>`); continue; }
+    flush();
+    if(it.type==="sub") share+=`<div class="sub"${ce}>${rich(it.cell)}</div>`;
+    else if(it.type==="line") share+=`<div class="wline"${ce}></div>`;
+    else share+=`<div class="note"${ce}>${rich(it.cell)}</div>`;
+  }
+  flush();
+  for(const s of D.shOther) share+=`<div class="note"${ce}>${s.paras.map(esc).join("<br>")}</div>`;
+  share+=`<div class="grow"${ce}>（追記欄：この枠線は印刷されません）</div>`;
+
+  const right=D.frontImgs.length
+    ? `<div class="box calimg">${D.frontImgs.map(i=>`<img src="${i.url}" alt="">`).join("")}</div>`
+    : `<div class="box cal">${calendar(d)}</div>`;
+
+  const p1=`<section class="page"><div class="sheet">
+    <div class="hdr"><div class="date"${ce}>${fmtDate(d)}</div><div class="ttl"${ce}>${esc(D.title)}</div><div class="name">氏名</div></div>
+    <div class="box"><div class="bh">${todoHead}</div><table class="todo">${todoRows}</table></div>
+    <div class="two">
+      <div class="box rit"><div class="bh"><span${ce}>${esc(D.ritHead)}</span><span${ce}>${esc(D.expHead)}</span></div>
+        ${whoTxt?`<div class="who"${ce}>担当：${esc(whoTxt)} 先生</div>`:""}
+        <table>${exps}</table></div>
+      <div>${D.testHead?`<div class="box tests"><div class="bh"${ce}>${esc(D.testHead)}</div><ul>${tests}</ul></div>`:""}${right}</div>
+    </div>
+    <div class="box share"><div class="bh"${ce}>${esc(D.shareHead)}</div><div class="body">${share}</div></div>
+    ${D.backNote?`<div class="foot"><span${ce}>${esc(D.backNote)}</span></div>`:""}
+  </div></section>`;
+  const p2=D.backImgs.length?`<section class="page p2${$("back").checked?"":" off"}${$("rot").checked?" rot":""}"><div class="sheet"><div class="rotbox">
+    <h2${ce}>${esc(D.backHead||"受験生カレンダー")}</h2>${D.backImgs.map(i=>`<img src="${i.url}" alt="">`).join("")}</div></div></section>`:"";
+  $("pages").innerHTML=p1+p2;
+  fit();
+}
+
+// A4 1枚に収まるよう文字サイズを自動調整
+function fit(){
+  const sheet=document.querySelector(".page .sheet"); if(!sheet) return;
+  const manual=+$("fs").value;
+  const over=()=>{ const g=sheet.querySelector(".grow"); return sheet.scrollHeight>sheet.clientHeight+1 || (g&&g.getBoundingClientRect().height<6); };
+  sheet.style.setProperty("--rh",1);
+  if(fsAuto){
+    let s=1.15; sheet.style.setProperty("--fs",s);
+    while(over()&&s>0.7){ s-=0.02; sheet.style.setProperty("--fs",s); }
+    if(over()){ let rh=1; while(over()&&rh>0.6){ rh-=0.05; sheet.style.setProperty("--rh",rh);} }
+    $("fs").value=Math.round(s*100); $("fsv").textContent="自動 "+Math.round(s*100)+"%";
+  } else {
+    sheet.style.setProperty("--fs",manual/100); $("fsv").textContent=manual+"%"+(over()?" ⚠はみ出し":"");
+  }
+}
+
+/* =====================================================================
+   4. 操作
+   ===================================================================== */
+const $=id=>document.getElementById(id);
+let fsAuto=true;
+function dateVal(){ const v=$("date").value; if(!v) return new Date(); const [y,m,d]=v.split("-").map(Number); return new Date(y,m-1,d); }
+(function(){ const t=new Date(); $("date").value=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`; })();
+
+async function load(file){
+  $("msg").textContent="";
+  if(!("DecompressionStream" in window)){ $("msg").textContent="このブラウザは古いため読み込めません。Google Chrome または Microsoft Edge の最新版で開いてください。"; return; }
+  try{
+    const bk=await readBook(await file.arrayBuffer());
+    DATA=extract(bk);
+    $("drop").style.display="none"; $("print").disabled=false;
+    document.title=`MT用紙 ${fmtDate(dateVal())}`;
+    render();
+    const warn=[];
+    if(!DATA.todo.length) warn.push("伝達事項（右側の番号付きの欄）が見つかりませんでした。");
+    if(!DATA.slots.length) warn.push("立礼担当の①〜⑤が見つかりませんでした。");
+    if(DATA.hasVector&&!DATA.frontImgs.length) warn.push("Excel内の月カレンダー図（EMF形式）はブラウザで表示できないため、自動作成した月カレンダーを表示しています。");
+    $("msg").textContent=warn.join(" ");
+  }catch(e){ console.error(e); $("msg").textContent="読み込みに失敗しました："+e.message; }
+}
+$("file").addEventListener("change",e=>{ if(e.target.files[0]) load(e.target.files[0]); e.target.value=""; });
+const dz=document.documentElement;
+dz.addEventListener("dragover",e=>{e.preventDefault();$("drop").classList.add("over");});
+dz.addEventListener("dragleave",()=>$("drop").classList.remove("over"));
+dz.addEventListener("drop",e=>{e.preventDefault();$("drop").classList.remove("over");const f=e.dataTransfer.files[0];if(f) load(f);});
+$("date").addEventListener("change",()=>{ render(); document.title=`MT用紙 ${fmtDate(dateVal())}`; });
+$("fs").addEventListener("input",()=>{ fsAuto=false; fit(); });
+$("fsv").addEventListener("click",()=>{ fsAuto=true; fit(); });
+$("back").addEventListener("change",()=>{ const p=document.querySelector(".p2"); if(p) p.classList.toggle("off",!$("back").checked); });
+$("rot").addEventListener("change",()=>{ const p=document.querySelector(".p2"); if(p) p.classList.toggle("rot",$("rot").checked); });
+$("print").addEventListener("click",()=>window.print());
+</script>
+</body>
+</html>
