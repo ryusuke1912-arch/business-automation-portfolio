@@ -1,0 +1,253 @@
+<title>教室のクリスマス掲示セット</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Kaisei+Decol:wght@700&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+<style>
+/* Layout: 机の上にA4用紙を並べたような画面。用紙そのものは常に白（印刷物なので固定色）。 */
+:root{
+  --desk:#E4E8E3; --desk-ink:#26302B; --desk-sub:#5C6A62;
+  --red:#B3262E; --green:#1F5A3D; --gold:#C29A3E; --ink:#1E2A24; --paper:#FFFFFF; --line:#C9D2CC;
+  --f-script:"Great Vibes", "Times New Roman", serif;
+  --f-display:"Kaisei Decol", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --f-body:"Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Yu Gothic", "WenQuanYi Zen Hei", sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--desk:#151B18;--desk-ink:#E6ECE8;--desk-sub:#9BAAA1;color-scheme:dark}}
+:root[data-theme="dark"]{--desk:#151B18;--desk-ink:#E6ECE8;--desk-sub:#9BAAA1;color-scheme:dark}
+
+body{background:var(--desk);color:var(--desk-ink);font-family:var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 60px}
+.intro{max-width:210mm;margin:0 auto 28px;display:grid;gap:10px}
+.intro h1{font-family:var(--f-display);font-size:1.7rem;margin:0;text-wrap:balance}
+.intro p{margin:0;line-height:1.8;color:var(--desk-sub);font-size:.95rem}
+.intro ol{margin:0;padding-left:1.3em;line-height:1.9;font-size:.95rem}
+.list{display:grid;gap:34px;justify-items:center}
+.item{display:grid;gap:8px;width:100%;max-width:210mm}
+.label{font-weight:700;font-size:.9rem;letter-spacing:.04em}
+.label span{font-weight:500;color:var(--desk-sub);margin-left:.6em}
+.fit{width:100%;overflow:hidden}
+.sheet{width:210mm;height:297mm;background:var(--paper);color:var(--ink);position:relative;overflow:hidden;
+  box-shadow:0 2px 14px rgba(0,0,0,.18);transform-origin:top left;font-family:var(--f-body)}
+svg{display:block}
+
+/* ---------- 共通の飾り ---------- */
+.frame{position:absolute;inset:9mm;border:1.2mm solid var(--green);border-radius:4mm}
+.frame::after{content:"";position:absolute;inset:2mm;border:.4mm solid var(--gold);border-radius:2.5mm}
+.flake{position:absolute;color:var(--line)}
+
+/* ---------- 1 メインポスター ---------- */
+.p1{display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:30mm}
+.p1 .script{font-family:var(--f-script);font-size:40mm;line-height:.9;color:var(--red);margin:0}
+.p1 .kana{font-family:var(--f-display);font-size:10mm;letter-spacing:.35em;color:var(--green);margin:4mm 0 6mm}
+.p1 .tree{width:120mm}
+.p1 .foot{position:absolute;bottom:22mm;left:0;right:0;font-size:6mm;font-weight:700;letter-spacing:.3em;color:var(--gold)}
+
+/* ---------- 2 応援ポスター ---------- */
+.p2{background:var(--green);color:#fff}
+.p2 .inner{position:absolute;inset:14mm;border:.5mm solid var(--gold);border-radius:3mm;display:flex;flex-direction:column;justify-content:center;padding:0 16mm}
+.p2 .eyebrow{font-size:6mm;letter-spacing:.3em;color:var(--gold);font-weight:700}
+.p2 h2{font-family:var(--f-display);font-size:17mm;line-height:1.45;margin:8mm 0 10mm;font-weight:700}
+.p2 h2 em{font-style:normal;color:#F6D78A}
+.p2 p{font-size:6.2mm;line-height:1.9;margin:0}
+.p2 .flake{color:rgba(255,255,255,.14)}
+.p2 .sig{position:absolute;right:16mm;bottom:16mm;font-family:var(--f-script);font-size:16mm;color:var(--gold)}
+
+/* ---------- 3 アドベントカレンダー ---------- */
+.p3{padding:16mm 13mm 12mm}
+.p3 header{text-align:center;margin-bottom:6mm}
+.p3 .script{font-family:var(--f-script);font-size:15mm;color:var(--red);line-height:1}
+.p3 h2{font-family:var(--f-display);font-size:10mm;margin:1mm 0 2mm;color:var(--green)}
+.p3 header p{margin:0;font-size:4mm;color:#4a5a51}
+.cal{display:grid;grid-template-columns:repeat(5,1fr);gap:2.4mm}
+.day{border:.45mm solid var(--green);border-radius:2.5mm;height:42mm;padding:2.5mm;display:grid;grid-template-rows:auto 1fr auto;position:relative}
+.day:nth-child(odd){border-color:var(--red)}
+.day b{font-family:var(--f-display);font-size:8mm;line-height:1;color:var(--red)}
+.day:nth-child(even) b{color:var(--green)}
+.day span{font-size:3.6mm;line-height:1.5;font-weight:700;align-self:center}
+.day i{justify-self:end;width:10mm;height:10mm;border:.35mm dashed #9aa79f;border-radius:50%}
+.day.last{background:#FBF3DD;border-color:var(--gold)}
+.day.last b{color:var(--gold)}
+.p3 .note{margin-top:4mm;text-align:center;font-size:3.6mm;color:#4a5a51}
+
+/* ---------- 4 オーナメントカード ---------- */
+.p4{padding:10mm 14mm;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:4mm}
+.orn{position:relative;display:flex;align-items:center;justify-content:center}
+.orn svg{width:84mm;height:90mm}
+
+/* ---------- 5 目標ツリー ---------- */
+.p5{display:flex;flex-direction:column;align-items:center;padding-top:18mm;text-align:center}
+.p5 h2{font-family:var(--f-display);font-size:15mm;color:var(--green);margin:0}
+.p5 .sub{font-size:5mm;margin:3mm 0 0;color:#4a5a51}
+.p5 svg{width:170mm;margin-top:6mm}
+
+/* ---------- 6〜9 ガーランド ---------- */
+.flags{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;padding:8mm;gap:6mm}
+.flag svg{width:100%;height:100%}
+
+@page{size:A4;margin:0}
+@media print{
+  body{background:#fff;padding:0}
+  .intro,.label{display:none}
+  .list{display:block}
+  .item{display:block;max-width:none}
+  .fit{height:auto!important;overflow:visible}
+  .sheet{box-shadow:none;transform:none!important;break-after:page;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="star" viewBox="-20 -20 40 40"><polygon points="0,-20 4.70,-6.47 19.02,-6.18 7.61,2.47 11.76,16.18 0,8 -11.76,16.18 -7.61,2.47 -19.02,-6.18 -4.70,-6.47" fill="currentColor"/></symbol>
+    <symbol id="flake" viewBox="-50 -50 100 100">
+      <g stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <g id="arm"><line x1="0" y1="0" x2="0" y2="-44"/><polyline points="-12,-32 0,-22 12,-32"/><polyline points="-8,-43 0,-36 8,-43"/></g>
+        <use href="#arm" transform="rotate(60)"/><use href="#arm" transform="rotate(120)"/>
+        <use href="#arm" transform="rotate(180)"/><use href="#arm" transform="rotate(240)"/><use href="#arm" transform="rotate(300)"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="intro">
+  <h1>教室のクリスマス掲示セット</h1>
+  <p>A4で印刷してそのまま掲示できる5種類・全9枚です。ツリーは画用紙やA3拡大コピーで大きくすると見栄えが上がります。</p>
+  <ol>
+    <li>Merry Christmas ポスター</li>
+    <li>冬期講習の応援ポスター</li>
+    <li>12月の学習アドベントカレンダー（できた日にシール）</li>
+    <li>目標オーナメントカード（生徒が記入して切り抜く・1枚6個）</li>
+    <li>みんなの目標ツリー（4のカードを貼る台紙）</li>
+    <li>MERRY CHRISTMAS ガーランド（4枚・切ってひもに通す）</li>
+  </ol>
+  <p>印刷はブラウザのメニューから。用紙A4、余白なし、倍率100%、背景のグラフィックをオンにしてください。</p>
+</header>
+
+<main class="list">
+
+<section class="item"><div class="label">1 / Merry Christmas ポスター<span>A4たて</span></div><div class="fit"><div class="sheet p1">
+  <div class="frame"></div>
+  <svg class="flake" style="left:20mm;top:22mm;width:16mm;height:16mm"><use href="#flake"/></svg>
+  <svg class="flake" style="right:22mm;top:40mm;width:22mm;height:22mm"><use href="#flake"/></svg>
+  <svg class="flake" style="left:26mm;top:150mm;width:12mm;height:12mm"><use href="#flake"/></svg>
+  <svg class="flake" style="right:26mm;top:190mm;width:14mm;height:14mm"><use href="#flake"/></svg>
+  <p class="script">Merry<br>Christmas</p>
+  <p class="kana">メリークリスマス</p>
+  <svg class="tree" viewBox="0 0 200 240">
+    <polygon points="100,30 142,98 58,98" fill="#1F5A3D"/>
+    <polygon points="100,66 160,152 40,152" fill="#1F5A3D"/>
+    <polygon points="100,108 180,212 20,212" fill="#1F5A3D"/>
+    <rect x="88" y="212" width="24" height="22" rx="2" fill="#7A4E2D"/>
+    <path d="M70 86 Q100 100 128 80 M58 136 Q100 156 146 128 M42 196 Q100 218 166 186" stroke="#C29A3E" stroke-width="3" fill="none" stroke-dasharray="1 6" stroke-linecap="round"/>
+    <g fill="#B3262E"><circle cx="86" cy="76" r="5"/><circle cx="122" cy="120" r="6"/><circle cx="66" cy="168" r="6"/><circle cx="140" cy="182" r="6"/><circle cx="100" cy="196" r="5"/></g>
+    <g fill="#C29A3E"><circle cx="112" cy="88" r="4"/><circle cx="80" cy="130" r="5"/><circle cx="114" cy="160" r="4"/><circle cx="52" cy="202" r="4"/><circle cx="158" cy="204" r="4"/></g>
+    <svg x="78" y="4" width="44" height="44" color="#C29A3E"><use href="#star"/></svg>
+  </svg>
+  <div class="foot">✦ HAPPY HOLIDAYS 2026 ✦</div>
+</div></div></section>
+
+<section class="item"><div class="label">2 / 冬期講習の応援ポスター<span>A4たて・緑ベタ</span></div><div class="fit"><div class="sheet p2">
+  <svg class="flake" style="right:24mm;top:24mm;width:40mm;height:40mm"><use href="#flake"/></svg>
+  <svg class="flake" style="left:22mm;bottom:40mm;width:26mm;height:26mm"><use href="#flake"/></svg>
+  <svg class="flake" style="right:50mm;bottom:70mm;width:14mm;height:14mm"><use href="#flake"/></svg>
+  <div class="inner">
+    <div class="eyebrow">WINTER COURSE 2026</div>
+    <h2>この冬、<br>いちばんの<br>プレゼントは<br><em>自分の成長。</em></h2>
+    <p>クリスマスも、お正月も、<br>がんばった日は必ず力になる。<br>冬期講習、いっしょに伸びよう。</p>
+  </div>
+  <div class="sig">Merry Christmas</div>
+</div></div></section>
+
+<section class="item"><div class="label">3 / 学習アドベントカレンダー<span>A4たて</span></div><div class="fit"><div class="sheet p3">
+  <header>
+    <div class="script">Advent Calendar</div>
+    <h2>12月の学習アドベントカレンダー</h2>
+    <p>1日1つ、小さなチャレンジ。できたら○にシールを貼ろう。</p>
+  </header>
+  <div class="cal" id="cal"></div>
+  <p class="note">25個そろったら、自分にいちばんのプレゼント。</p>
+</div></div></section>
+
+<section class="item"><div class="label">4 / 目標オーナメントカード<span>A4たて・6個／枚・人数分印刷</span></div><div class="fit"><div class="sheet p4" id="orns"></div></div></section>
+
+<section class="item"><div class="label">5 / みんなの目標ツリー<span>A4たて（A3拡大推奨）</span></div><div class="fit"><div class="sheet p5">
+  <div class="frame"></div>
+  <h2>みんなの目標ツリー</h2>
+  <p class="sub">冬の目標をオーナメントに書いて、ツリーに飾ろう</p>
+  <svg viewBox="0 0 200 220">
+    <polygon points="100,18 150,84 128,84 168,140 146,140 190,198 10,198 54,140 32,140 72,84 50,84" fill="none" stroke="#1F5A3D" stroke-width="2.4" stroke-linejoin="round"/>
+    <rect x="88" y="198" width="24" height="18" fill="none" stroke="#7A4E2D" stroke-width="2.4"/>
+    <svg x="84" y="0" width="32" height="32" color="#C29A3E"><use href="#star"/></svg>
+  </svg>
+</div></div></section>
+
+<div id="flagSheets" style="display:contents"></div>
+</main>
+
+<script>
+(function(){
+  // アドベントカレンダー
+  var tasks=["英単語を10個覚える","計算問題を20問解く","漢字を10個書く","苦手な単元を1つ書き出す","教科書を5分音読する",
+    "理科の用語を5つ説明する","間違えた問題を解き直す","歴史の年号を3つ覚える","英文を1つ暗唱する","スマホを置いて30分集中",
+    "都道府県・国を5つ地図で確認","先生に1つ質問する","1週間のノートを見直す","英単語テストで満点","図形の問題を1問じっくり",
+    "古文単語・熟語を5つ","今日の勉強計画を書く","朝に10分だけ勉強する","テスト・模試を見直す","好きな教科を1時間",
+    "苦手な教科を1時間","今日学んだことを家族に話す","冬休みの計画を立てる","今年できるようになったことを3つ書く","自分にごほうび！"];
+  var cal=document.getElementById("cal");
+  tasks.forEach(function(t,i){
+    var d=document.createElement("div");d.className="day"+(i===24?" last":"");
+    d.innerHTML="<b>"+(i+1)+"</b><span>"+t+"</span><i></i>";cal.appendChild(d);
+  });
+
+  // オーナメントカード
+  var colors=["#B3262E","#1F5A3D","#C29A3E","#1F5A3D","#C29A3E","#B3262E"];
+  var orns=document.getElementById("orns");
+  colors.forEach(function(c){
+    var o=document.createElement("div");o.className="orn";
+    o.innerHTML='<svg viewBox="0 0 84 90">'+
+      '<rect x="36" y="2" width="12" height="9" rx="1.5" fill="'+c+'"/>'+
+      '<circle cx="42" cy="4.5" r="1.4" fill="#fff"/>'+
+      '<circle cx="42" cy="50" r="38" fill="#fff" stroke="'+c+'" stroke-width="2"/>'+
+      '<circle cx="42" cy="50" r="34.5" fill="none" stroke="'+c+'" stroke-width=".5" stroke-dasharray="1.5 1.5"/>'+
+      '<text x="42" y="30" text-anchor="middle" font-family="Zen Maru Gothic, sans-serif" font-weight="700" font-size="5.2" fill="'+c+'">わたしの冬の目標</text>'+
+      '<g stroke="#C9D2CC" stroke-width=".5"><line x1="14" y1="44" x2="70" y2="44"/><line x1="10" y1="55" x2="74" y2="55"/><line x1="14" y1="66" x2="70" y2="66"/></g>'+
+      '<text x="24" y="78" font-family="Zen Maru Gothic, sans-serif" font-size="3.8" fill="#5C6A62">なまえ</text>'+
+      '<line x1="37" y1="78.5" x2="62" y2="78.5" stroke="#C9D2CC" stroke-width=".5"/>'+
+      '</svg>';
+    orns.appendChild(o);
+  });
+
+  // ガーランド
+  var letters="MERRY★CHRISTMAS".split("");
+  var fills=["#B3262E","#1F5A3D","#C29A3E"];
+  var host=document.getElementById("flagSheets"), per=4, pages=Math.ceil(letters.length/per);
+  for(var p=0;p<pages;p++){
+    var sec=document.createElement("section");sec.className="item";
+    sec.innerHTML='<div class="label">6 / ガーランド ('+(p+1)+'/'+pages+')<span>A4たて・線で切ってひもに通す</span></div><div class="fit"><div class="sheet flags"></div></div>';
+    var sh=sec.querySelector(".sheet");
+    letters.slice(p*per,p*per+per).forEach(function(ch,k){
+      var idx=p*per+k, f=fills[idx%3], star=ch==="★";
+      var inner=star?'<svg x="35" y="30" width="30" height="30" color="#fff"><use href="#star"/></svg>'
+        :'<text x="50" y="58" text-anchor="middle" font-family="Kaisei Decol, serif" font-weight="700" font-size="34" fill="#fff">'+ch+'</text>';
+      var fl=document.createElement("div");fl.className="flag";
+      fl.innerHTML='<svg viewBox="0 0 100 130" preserveAspectRatio="xMidYMid meet">'+
+        '<path d="M6 4 H94 V12 H6 Z" fill="none" stroke="#C9D2CC" stroke-width=".4" stroke-dasharray="2 2"/>'+
+        '<polygon points="6,12 94,12 50,124" fill="'+f+'" stroke="#C9D2CC" stroke-width=".4" stroke-dasharray="2 2"/>'+
+        '<polygon points="12,17 88,17 50,112" fill="none" stroke="#fff" stroke-width=".8" stroke-dasharray="2 1.5" opacity=".7"/>'+
+        '<circle cx="16" cy="8" r="1.6" fill="none" stroke="#9aa79f" stroke-width=".4"/><circle cx="84" cy="8" r="1.6" fill="none" stroke="#9aa79f" stroke-width=".4"/>'+
+        inner+'</svg>';
+      sh.appendChild(fl);
+    });
+    host.appendChild(sec);
+  }
+
+  // 画面幅に合わせて用紙を縮小
+  function fit(){
+    document.querySelectorAll(".fit").forEach(function(w){
+      var s=w.firstElementChild, k=Math.min(1,w.clientWidth/s.offsetWidth);
+      s.style.transform="scale("+k+")"; w.style.height=(s.offsetHeight*k)+"px";
+    });
+  }
+  window.addEventListener("resize",fit); fit();
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
+  window.addEventListener("beforeprint",function(){document.querySelectorAll(".fit").forEach(function(w){w.style.height="";});});
+  window.addEventListener("afterprint",fit);
+})();
+</script>
